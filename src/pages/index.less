@@ -1,0 +1,253 @@
+.main{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: url('../assets/bg.png') no-repeat;
+  background-size: 100% 100%;
+  .top{
+    width: 100%;
+    height: 115px;
+    background: url('../assets/top.png') no-repeat;
+    background-size: 100% 100%;
+    display: flex;
+    .topLeft{
+      width: 27%;
+      height: 80%;
+      flex-grow: 0;
+      display: flex;
+      align-items: center;
+      .dateTime{
+        font-size: 20px;
+        font-family: PingFangSC-Regular, PingFang SC;
+        font-weight: 400;
+        color: #FFFFFF;
+        position: relative;
+        left: 10%;
+      }
+    }
+    .topMiddle{
+      height: 85%;
+      flex-grow: 1;
+      .title{
+        font-size: 54px;
+        font-family: FZSKJW--GB1-0, FZSKJW--GB1;
+        color: #F9F7FF;
+        line-height: 82px;
+        text-align: center;
+      }
+    }
+    .topRight{
+      width: 27%;
+      height: 80%;
+      flex-grow: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .logo{
+        height: 30%;
+      }
+    }
+  }
+  .body{
+    flex-grow: 1;
+    display: flex;
+    padding: 0 0 40px;
+    .bodyLeft{
+      margin: 0 16px;
+      width: 450px;
+      display: flex;
+      flex-direction: column;
+      .leftTop{
+        height: 34%;
+        margin: 0 0 30px;
+        background: rgba(0, 36, 84, 0.24);
+        border: 2px solid #3079DF;
+        .content{
+          height: 100%;
+          padding: 18px 0;
+          display: flex;
+          flex-direction: column;
+          .contentTitle{
+            margin-bottom: 18px;
+          }
+          .tabs{
+            padding: 0 38px;
+          }
+          .data{
+            padding: 0 10px;
+            display: flex;
+            flex-grow: 1;
+            .dataBlue,
+            .dataGreen,
+            .dataRed{
+              margin: 0 20px;
+              flex-grow: 1;
+              background-size: 100% 100% !important;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              width: calc(100% / 3);
+              .text{
+                font-size: 16px;
+                font-family: Arial, Helvetica, sans-serif;
+                color: #FFFFFF;
+                margin-top: auto;
+                padding-bottom: 12px;
+              }
+            }
+            .dataBlue{
+              background: url('../assets/blue.png') no-repeat;
+              .number{
+                font-size: 32px;
+                font-family: Arial, Helvetica, sans-serif;
+                color: #08E3F9;
+              }
+            }
+            .dataGreen{
+              background: url('../assets/green.png') no-repeat;
+              .number{
+                font-size: 32px;
+                font-family: Arial, Helvetica, sans-serif;
+                color: #0BE08B;
+              }
+            }
+            .dataRed{
+              background: url('../assets/red.png') no-repeat;
+              .number{
+                font-size: 32px;
+                font-family: Arial, Helvetica, sans-serif;
+                color: #FD5D61;
+              }
+            }
+          }
+        }
+      }
+      .leftBottom{
+        flex-grow: 1;
+        background: rgba(0, 36, 84, 0.24);
+        border: 2px solid #3079DF;
+        .content{
+          height: 100%;
+          padding: 18px 0;
+          display: flex;
+          flex-direction: column;
+          .titleLine{
+            display: flex;
+            margin-bottom: 28px;
+            .select{
+              width: 115px;
+              margin-left: auto;
+              margin-right: 20px;
+              :global{
+                .ant-select-selector{
+                  border-color: #66D7F6;
+                  background: transparent;
+                  color: #FFFFFF;
+                }
+              }
+            }
+          }
+          .progressArea{
+            padding: 0 10px;
+            display: flex;
+            justify-content: center;
+            .progress{
+              padding: 0 10px;
+              .progressText{
+                .percent{
+                  font-size: 30px;
+                  font-family: PingFangSC-Regular, PingFang SC;
+                  font-weight: 400;
+                  line-height: 42px;
+                }
+                .itemName{
+                  font-size: 14px;
+                  line-height: 20px;
+                  color: #FFFFFF;
+                  font-weight: 400;
+                }
+              }
+              :global{
+                .ant-progress-inner{
+                  height: 115px !important;
+                  width: 115px !important;
+                }
+              }
+            }
+          }
+          .mapArea{
+            flex-grow: 1;
+            padding: 30px 20px 0 20px;
+            >div{
+              height: 100% !important;
+            }
+          }
+        }
+      }
+    }
+    .bodyMiddle{
+      margin: 0 10px;
+      flex-grow: 1;
+    }
+    .bodyRight{
+      margin: 0 16px;
+      width: 26%;
+    }
+
+    .contentTitle{
+      font-size: 24px;
+      font-family: PingFangSC-Regular, PingFang SC;
+      font-weight: 400;
+      color: #4BF3F9;
+      line-height: 33px;
+      display: flex;
+      align-items: center;
+      margin-left: 20px;
+      &::before{
+        content: '';
+        display: inline-block;
+        width: 4px;
+        height: 24px;
+        background: #4FC7E1;
+        margin-right: 10px;
+      }
+    }
+  }
+  .tab{
+    :global{
+      .ant-tabs-nav::before{
+        display: none;
+      }
+      .ant-tabs-nav-list{
+        background: #0E2B68;
+        border-radius: 4px;
+        width: 100%;
+        .ant-tabs-tab{
+          margin: 0 !important;
+          border: 0;
+          font-size: 16px;
+          background: transparent;
+          color: #90A0C0;
+          font-weight: 400;
+          padding: 6px 16px;
+          border-radius: 4px;
+          flex-grow: 1;
+          display: inline-flex;
+          justify-content: center;
+        }
+        .ant-tabs-tab.ant-tabs-tab-active{
+          background: #3AA3FF;
+          font-weight: 500;
+          .ant-tabs-tab-btn{
+            color: #FFFFFF;
+          }
+        }
+        .ant-tabs-tab-btn:focus,
+        .ant-tabs-tab-remove:focus{
+          color: unset;
+        }
+      }
+    }
+  }
+}
