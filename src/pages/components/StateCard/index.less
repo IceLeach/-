@@ -1,0 +1,43 @@
+.card {
+  margin-top: 8px;
+  .successState {
+    height: 35px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(to right, #18383b, #011749);
+    .successPoint {
+      width: 3px;
+      height: 3px;
+      margin-left: 8px;
+      background: #70ffcd;
+    }
+    .successNumber {
+      font-size: 16px;
+      margin-left: 16px;
+      color: #70ffcd;
+    }
+  }
+  .errorState {
+    height: 35px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(to right, #37212c, #011749);
+    .errorPoint {
+      width: 3px;
+      height: 3px;
+      margin-left: 8px;
+      background: #ff6868;
+    }
+    .errorNumber {
+      font-size: 16px;
+      margin-left: 16px;
+      color: #ff6868;
+    }
+  }
+  .text {
+    margin-left: 4px;
+    color: #fff;
+  }
+}

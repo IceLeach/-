@@ -2,18 +2,21 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Helmet } from 'umi';
 import moment from 'moment';
 import 'moment/locale/zh-cn';
-import { Progress, Select, Tabs } from 'antd';
+import { Progress, Select, Table, Tabs } from 'antd';
 import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
 import { Area } from '@ant-design/plots';
 // import { Scene, LineLayer, PointLayer } from '@antv/l7';
 // import { Mapbox, GaodeMap } from '@antv/l7-maps';
 import G6 from '@antv/g6';
+import ScrollTable, { scrollRef } from './components/ScrollTable';
+import StateCard from './components/StateCard';
 // @ts-ignore
 import logo from '@/assets/logo.ico';
 import styles from './index.less';
 
 interface runtimeRefType {
   leftTabsInterval: NodeJS.Timer | null;
+  scrollTableInterval: NodeJS.Timer | null;
 }
 
 const leftSelectData = [
@@ -76,22 +79,126 @@ const n = [
   { id: '4', x: 170.2285476653881, y: 366.2158066640094, error: false },
 ];
 const bottomData = [
-  //'设备','所在机房','内容','时间','事件级别'
-  ['设备1', '1号机房', '内容', '2022-03-28 15:00:00', '1'],
-  ['设备2', '1号机房', '内容', '2022-03-28 15:00:00', '1'],
-  ['设备3', '1号机房', '内容', '2022-03-28 15:00:00', '1'],
-  ['设备4', '2号机房', '内容', '2022-03-28 15:00:00', '2'],
-  ['设备5', '2号机房', '内容', '2022-03-28 15:00:00', '2'],
-  ['设备6', '2号机房', '内容', '2022-03-28 15:00:00', '2'],
-  ['设备7', '3号机房', '内容', '2022-03-28 15:00:00', '3'],
-  ['设备8', '3号机房', '内容', '2022-03-28 15:00:00', '3'],
-  ['设备9', '3号机房', '内容', '2022-03-28 15:00:00', '3'],
-  ['设备10', '4号机房', '内容', '2022-03-28 15:00:00', '4'],
-  ['设备11', '4号机房', '内容', '2022-03-28 15:00:00', '4'],
-  ['设备12', '4号机房', '内容', '2022-03-28 15:00:00', '4'],
-  ['设备13', '5号机房', '内容', '2022-03-28 15:00:00', '5'],
-  ['设备14', '5号机房', '内容', '2022-03-28 15:00:00', '5'],
-  ['设备15', '5号机房', '内容', '2022-03-28 15:00:00', '5'],
+  {
+    id: '1',
+    name: '设备1',
+    address: '1号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '1',
+  },
+  {
+    id: '2',
+    name: '设备2',
+    address: '1号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '1',
+  },
+  {
+    id: '3',
+    name: '设备3',
+    address: '1号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '1',
+  },
+  {
+    id: '4',
+    name: '设备4',
+    address: '2号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '2',
+  },
+  {
+    id: '5',
+    name: '设备5',
+    address: '2号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '2',
+  },
+  {
+    id: '6',
+    name: '设备6',
+    address: '2号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '2',
+  },
+  {
+    id: '7',
+    name: '设备7',
+    address: '3号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '3',
+  },
+  {
+    id: '8',
+    name: '设备8',
+    address: '3号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '3',
+  },
+  {
+    id: '9',
+    name: '设备9',
+    address: '3号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '3',
+  },
+  {
+    id: '10',
+    name: '设备10',
+    address: '4号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '4',
+  },
+  {
+    id: '11',
+    name: '设备11',
+    address: '4号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '4',
+  },
+  {
+    id: '12',
+    name: '设备12',
+    address: '4号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '4',
+  },
+  {
+    id: '13',
+    name: '设备13',
+    address: '5号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '5',
+  },
+  {
+    id: '14',
+    name: '设备14',
+    address: '5号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '5',
+  },
+  {
+    id: '15',
+    name: '设备15',
+    address: '5号机房',
+    content: '内容',
+    dateTime: '2022-03-28 15:00:00',
+    state: '5',
+  },
 ];
 
 const IndexPage: React.FC = () => {
@@ -99,7 +206,39 @@ const IndexPage: React.FC = () => {
   const [leftActiveKey, setLeftActiveKey] = useState<string>('1');
   const [leftSelectKey, setLeftSelectKey] = useState<string>('1');
   const [bottomBoxUp, setBottomBoxUp] = useState<boolean>(false);
-  const runtimeRef = useRef<runtimeRefType>({ leftTabsInterval: null });
+  const [scrollPause, setScrollPause] = useState<boolean>(false);
+  const runtimeRef = useRef<runtimeRefType>({
+    leftTabsInterval: null,
+    scrollTableInterval: null,
+  });
+
+  // const columns = [
+  //   {
+  //     title: '设备',
+  //     dataIndex: 'name',
+  //     render: (_: any, record: any) => (<div className='td'>{record.name}</div>),
+  //   },
+  //   {
+  //     title: '所在机房',
+  //     dataIndex: 'address',
+  //     render: (_: any, record: any) => (<div className='td'>{record.address}</div>),
+  //   },
+  //   {
+  //     title: '内容',
+  //     dataIndex: 'content',
+  //     render: (_: any, record: any) => (<div className='td'>{record.content}</div>),
+  //   },
+  //   {
+  //     title: '时间',
+  //     dataIndex: 'dateTime',
+  //     render: (_: any, record: any) => (<div className='td'>{record.dateTime}</div>),
+  //   },
+  //   {
+  //     title: '事件级别',
+  //     dataIndex: 'state',
+  //     render: (_: any, record: any) => (<div className='td'>{record.state}</div>),
+  //   },
+  // ];
 
   // const [data, setData] = useState([]);
 
@@ -137,9 +276,20 @@ const IndexPage: React.FC = () => {
       }
     });
   };
+  const tableScroll = () => {
+    scrollRef && scrollRef.slickNext();
+  };
   const clearRefInterval = (interval: NodeJS.Timer | null) => {
     if (interval) {
       clearInterval(interval);
+    }
+  };
+
+  const getScrollLimit = (maxCount: number) => {
+    if (bottomData.length >= maxCount) {
+      return maxCount;
+    } else {
+      return bottomData.length;
     }
   };
 
@@ -147,7 +297,8 @@ const IndexPage: React.FC = () => {
     setInterval(() => {
       setDateTime(moment().format('HH:mm:ss\xa0\xa0YYYY年M月D日\xa0\xa0dddd'));
     }, 1000);
-    runtimeRef.current.leftTabsInterval = setInterval(changeLeftTab, 1000);
+    runtimeRef.current.leftTabsInterval = setInterval(changeLeftTab, 2000);
+    runtimeRef.current.scrollTableInterval = setInterval(tableScroll, 2000);
   }, []);
 
   // useLayoutEffect(() => {
@@ -351,7 +502,7 @@ const IndexPage: React.FC = () => {
                 onMouseLeave={() =>
                   (runtimeRef.current.leftTabsInterval = setInterval(
                     changeLeftTab,
-                    1000,
+                    2000,
                   ))
                 }
               >
@@ -405,70 +556,79 @@ const IndexPage: React.FC = () => {
                   </Select>
                 </div>
                 <div className={styles.progressArea}>
-                  <Progress
-                    className={styles.progress}
-                    type="circle"
-                    trailColor="#3A4A6D"
-                    percent={99}
-                    format={(percent) => (
-                      <div className={styles.progressText}>
-                        <div
-                          className={styles.percent}
-                          style={{ color: '#72ECFF' }}
-                        >
-                          {percent}%
+                  <div>
+                    <Progress
+                      className={styles.progress}
+                      type="circle"
+                      trailColor="#3A4A6D"
+                      percent={99}
+                      format={(percent) => (
+                        <div className={styles.progressText}>
+                          <div
+                            className={styles.percent}
+                            style={{ color: '#72ECFF' }}
+                          >
+                            {percent}%
+                          </div>
+                          <div className={styles.itemName}>市电</div>
                         </div>
-                        <div className={styles.itemName}>市电</div>
-                      </div>
-                    )}
-                    strokeColor={{
-                      '0%': '#72ECFF',
-                      // '50%': '#339AFF',
-                      '100%': '#339AFF',
-                    }}
-                  />
-                  <Progress
-                    className={styles.progress}
-                    type="circle"
-                    trailColor="#3A4A6D"
-                    percent={99}
-                    format={(percent) => (
-                      <div className={styles.progressText}>
-                        <div
-                          className={styles.percent}
-                          style={{ color: '#B7A0FF' }}
-                        >
-                          {percent}%
+                      )}
+                      strokeColor={{
+                        '0%': '#72ECFF',
+                        // '50%': '#339AFF',
+                        '100%': '#339AFF',
+                      }}
+                    />
+                    <StateCard successNum={16} errorNum={0} />
+                  </div>
+                  <div>
+                    <Progress
+                      className={styles.progress}
+                      type="circle"
+                      trailColor="#3A4A6D"
+                      percent={99}
+                      format={(percent) => (
+                        <div className={styles.progressText}>
+                          <div
+                            className={styles.percent}
+                            style={{ color: '#B7A0FF' }}
+                          >
+                            {percent}%
+                          </div>
+                          <div className={styles.itemName}>UPS</div>
                         </div>
-                        <div className={styles.itemName}>UPS</div>
-                      </div>
-                    )}
-                    strokeColor={{
-                      '0%': '#9372FF',
-                      '100%': '#6C8BE8',
-                    }}
-                  />
-                  <Progress
-                    className={styles.progress}
-                    type="circle"
-                    trailColor="#3A4A6D"
-                    percent={99}
-                    format={(percent) => (
-                      <div className={styles.progressText}>
-                        <div
-                          className={styles.percent}
-                          style={{ color: '#71A4FF' }}
-                        >
-                          {percent}%
+                      )}
+                      strokeColor={{
+                        '0%': '#9372FF',
+                        '100%': '#6C8BE8',
+                      }}
+                    />
+                    <StateCard successNum={16} errorNum={0} />
+                  </div>
+                  <div>
+                    <Progress
+                      className={styles.progress}
+                      type="circle"
+                      trailColor="#3A4A6D"
+                      percent={99}
+                      format={(percent) => (
+                        <div className={styles.progressText}>
+                          <div
+                            className={styles.percent}
+                            style={{ color: '#71A4FF' }}
+                          >
+                            {percent}%
+                          </div>
+                          <div className={styles.itemName}>空调</div>
                         </div>
-                        <div className={styles.itemName}>空调</div>
-                      </div>
-                    )}
-                    strokeColor={{
-                      '0%': '#4A93FF',
-                      '100%': '#6AA0FF',
-                    }}
-                  />
+                      )}
+                      strokeColor={{
+                        '0%': '#4A93FF',
+                        '100%': '#6AA0FF',
+                      }}
+                    />
+                    <StateCard successNum={16} errorNum={0} />
+                  </div>
                 </div>
                 <div className={styles.mapArea}>
                   <Area
@@ -491,7 +651,7 @@ const IndexPage: React.FC = () => {
             <div className={styles.innerMap} id="container"></div>
             <div
               className={styles.middleBottom}
-              style={{ height: bottomBoxUp ? 500 : 300 }}
+              style={{ height: bottomBoxUp ? 600 : 220 }}
             >
               <div className={styles.content}>
                 <div className={styles.titleLine}>
@@ -508,19 +668,57 @@ const IndexPage: React.FC = () => {
                     />
                   )}
                 </div>
-                <div className={styles.scrollTable}>
-                  {/* <div className={styles.thead}>
-                    <div>设备</div>
-                    <div>所在机房</div>
-                    <div>内容</div>
-                    <div>时间</div>
-                    <div>事件级别</div>
-                  </div> */}
+                <div
+                  className={styles.scrollTable}
+                  onWheel={(e) => {
+                    if (e.nativeEvent.deltaY > 0) {
+                      scrollRef && scrollRef.slickNext();
+                    } else if (e.nativeEvent.deltaY < 0) {
+                      scrollRef && scrollRef.slickPrev();
+                    }
+                  }}
+                  onMouseEnter={() => {
+                    clearRefInterval(runtimeRef.current.scrollTableInterval);
+                    setScrollPause(true);
+                  }}
+                  onMouseLeave={() => {
+                    runtimeRef.current.scrollTableInterval = setInterval(
+                      tableScroll,
+                      2000,
+                    );
+                    setScrollPause(false);
+                  }}
+                >
+                  <ScrollTable
+                    data={bottomData}
+                    slidesToShow={
+                      bottomBoxUp ? getScrollLimit(10) : getScrollLimit(2)
+                    }
+                    scrollPause={scrollPause}
+                  />
+                  {/* <Table
+                    columns={columns}
+                    dataSource={bottomData}
+                    pagination={false}
+                    scroll={{ y: 200 }}
+                    className={styles.dataTable}
+                  /> */}
                 </div>
               </div>
             </div>
           </div>
-          <div className={styles.bodyRight}></div>
+          <div className={styles.bodyRight}>
+            <div className={styles.rightTop}>
+              <div className={styles.content}>
+                <div className={styles.contentTitle}>温湿度</div>
+              </div>
+            </div>
+            <div className={styles.rightBottom}>
+              <div className={styles.content}>
+                <div className={styles.contentTitle}>历史告警统计</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>

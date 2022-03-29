@@ -1,3 +1,32 @@
-#root{
+#root {
   height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 8px;
+}
+
+// 隐藏所有箭头按钮
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+// 垂直滚动条渐增或渐减箭头不显示( 防止滚动条掩盖圆角 )
+::-webkit-scrollbar-button:vertical:increment {
+  display: block;
+  height: 5px;
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  height: 50px;
+  background-color: #c8cacc;
+  border-radius: 2px;
+  outline-offset: -2px;
+}
+
+::-webkit-scrollbar-track-piece {
+  background: transparent;
+  border-radius: 0;
 }
