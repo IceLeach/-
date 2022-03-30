@@ -50,5 +50,5 @@ const ScrollTable: React.FC<ScrollTableType> = (props) => {
   );
 };
 
-export default ScrollTable;
+export default React.memo(ScrollTable);
 export { scrollRef };

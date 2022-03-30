@@ -1,17 +1,23 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Helmet } from 'umi';
-import moment from 'moment';
-import 'moment/locale/zh-cn';
-import { Progress, Select, Table, Tabs } from 'antd';
-import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
+import { Progress, Select, Tabs } from 'antd';
+import {
+  CaretDownOutlined,
+  CaretUpOutlined,
+  LeftCircleOutlined,
+} from '@ant-design/icons';
 import { Area } from '@ant-design/plots';
 // import { Scene, LineLayer, PointLayer } from '@antv/l7';
 // import { Mapbox, GaodeMap } from '@antv/l7-maps';
-import G6 from '@antv/g6';
+import G6, { Graph } from '@antv/g6';
 import ScrollTable, { scrollRef } from './components/ScrollTable';
 import StateCard from './components/StateCard';
+import HistoryDualAxes from './components/HistoryDualAxes';
+import FlylineChart from './components/FlylineChart';
+import DateTime from './components/DateTime';
 // @ts-ignore
 import logo from '@/assets/logo.ico';
+import mapCenterPoint from '@/assets/mapCenterPoint.png';
 import styles from './index.less';
 
 interface runtimeRefType {
@@ -201,12 +207,150 @@ const bottomData = [
   },
 ];
 
+const data = [
+  {
+    time: '1月',
+    alarm: 52,
+    alarmLine: 52,
+  },
+  {
+    time: '2月',
+    alarm: 22,
+    alarmLine: 22,
+  },
+  {
+    time: '3月',
+    alarm: 48,
+    alarmLine: 48,
+  },
+  {
+    time: '4月',
+    alarm: 25,
+    alarmLine: 25,
+  },
+  {
+    time: '5月',
+    alarm: 9,
+    alarmLine: 9,
+  },
+  {
+    time: '6月',
+    alarm: 16,
+    alarmLine: 16,
+  },
+  {
+    time: '7月',
+    alarm: 10,
+    alarmLine: 10,
+  },
+  {
+    time: '8月',
+    alarm: 17,
+    alarmLine: 17,
+  },
+  {
+    time: '9月',
+    alarm: 16,
+    alarmLine: 16,
+  },
+  {
+    time: '10月',
+    alarm: 19,
+    alarmLine: 19,
+  },
+  {
+    time: '11月',
+    alarm: 22,
+    alarmLine: 22,
+  },
+  {
+    time: '12月',
+    alarm: 35,
+    alarmLine: 35,
+  },
+];
+
+const points = [
+  {
+    name: '郑州',
+    coordinate: [0.48, 0.35],
+    icon: {
+      src: mapCenterPoint,
+      width: 30,
+      height: 30,
+    },
+    text: {
+      color: '#fb7293',
+    },
+  },
+  {
+    name: '新乡',
+    coordinate: [0.52, 0.23],
+  },
+  {
+    name: '焦作',
+    coordinate: [0.43, 0.29],
+  },
+  {
+    name: '开封',
+    coordinate: [0.59, 0.35],
+  },
+  {
+    name: '许昌',
+    coordinate: [0.53, 0.47],
+  },
+  {
+    name: '平顶山',
+    coordinate: [0.45, 0.54],
+  },
+  {
+    name: '洛阳',
+    coordinate: [0.36, 0.38],
+  },
+  {
+    name: '周口',
+    coordinate: [0.62, 0.55],
+  },
+];
+const lines = [
+  {
+    source: '新乡',
+    target: '郑州',
+  },
+  {
+    source: '焦作',
+    target: '郑州',
+  },
+  {
+    source: '开封',
+    target: '郑州',
+  },
+  {
+    source: '许昌',
+    target: '郑州',
+  },
+  {
+    source: '平顶山',
+    target: '郑州',
+  },
+  {
+    source: '洛阳',
+    target: '郑州',
+  },
+  {
+    source: '周口',
+    target: '郑州',
+    color: '#fb7293',
+  },
+];
+
 const IndexPage: React.FC = () => {
-  const [dateTime, setDateTime] = useState<string>('');
   const [leftActiveKey, setLeftActiveKey] = useState<string>('1');
   const [leftSelectKey, setLeftSelectKey] = useState<string>('1');
   const [bottomBoxUp, setBottomBoxUp] = useState<boolean>(false);
   const [scrollPause, setScrollPause] = useState<boolean>(false);
+  const [isInnerMap, setIsInnerMap] = useState<boolean>(false);
+  const [innerGraph, setInnerGraph] = useState<Graph | null>(null);
   const runtimeRef = useRef<runtimeRefType>({
     leftTabsInterval: null,
     scrollTableInterval: null,
@@ -293,10 +437,143 @@ const IndexPage: React.FC = () => {
     }
   };
 
+  const DrawInnerMap = () => {
+    G6.registerNode(
+      'breath-node',
+      {
+        afterDraw(cfg: any, group: any) {
+          if (cfg.error) {
+            console.log('cfg', cfg, group);
+            const r = cfg.size / 2;
+            const back1 = group.addShape('circle', {
+              zIndex: -3,
+              attrs: {
+                x: 0,
+                y: 0,
+                r,
+                fill: cfg.color || (cfg.style && cfg.style.fill),
+                opacity: 0.6,
+              },
+              name: 'back1-shape',
+            });
+            group.sort(); // 排序，根据zIndex 排序
+            const delayBase = Math.random() * 2000;
+            back1.animate(
+              {
+                // 逐渐放大，并消失
+                r: r + 10,
+                opacity: 0.0,
+              },
+              {
+                repeat: true, // 循环
+                duration: 3000,
+                easing: 'easeCubic',
+                delay: delayBase, // 无延迟
+              },
+            );
+          }
+        },
+      },
+      'circle',
+    );
+
+    const graph = new G6.Graph({
+      container: 'container',
+      width: 500,
+      height: 500,
+      modes: {
+        default: [
+          {
+            type: 'tooltip',
+            formatText: function formatText(model) {
+              console.log('model', model);
+              return `<div>ID: ${model.id}</div>
+              <div>位置: (${model.x},${model.y})</div>`;
+            },
+            shouldUpdate: (e) => true,
+          },
+        ],
+      },
+      defaultNode: {
+        type: 'breath-node',
+        size: 5,
+        style: {
+          lineWidth: 0,
+          fill: 'rgb(240, 223, 83)',
+        },
+      },
+    });
+    graph.data({ nodes: n });
+    // fetch('https://gw.alipayobjects.com/os/basement_prod/8c2353b0-99a9-4a93-a5e1-3e7df1eac64f.json')
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     const nodes = data.nodes;
+    //     // const classMap = new Map();
+    //     // let classId = 0;
+    //     nodes.forEach(function (node) {
+    //       node.y = -node.y;
+    //     });
+    //     scaleNodesPoints(nodes, graphSize);
+    //     console.log('data', data)
+    //     // graph.data(data);
+    //     graph.data({ nodes: n })
+    //     graph.render();
+    //   });
+
+    graph.on('node:click', (e) => console.log('e', e));
+
+    graph.get('container').style.backgroundImage =
+      'url("https://gw.alipayobjects.com/mdn/rms_f8c6a0/afts/img/A*G23iRqkiibIAAAAAAAAAAABkARQnAQ")';
+    graph.get('container').style.backgroundSize = '500px 500px';
+    graph.get('container').style.backgroundRepeat = 'no-repeat';
+    setInnerGraph(graph);
+    graph.render();
+  };
+  const removeInnerMap = () => {
+    innerGraph?.destroy();
+    setIsInnerMap(false);
+  };
+
+  const getOffsetTop = (obj: any) => {
+    let tmp = obj.offsetTop;
+    let val = obj.offsetParent;
+    while (val != null) {
+      tmp += val.offsetTop;
+      val = val.offsetParent;
+    }
+    return tmp;
+  };
+  const getOffsetLeft = (obj: any) => {
+    let tmp = obj.offsetLeft;
+    let val = obj.offsetParent;
+    while (val != null) {
+      tmp += val.offsetLeft;
+      val = val.offsetParent;
+    }
+    return tmp;
+  };
+  const mapClick = (e: React.MouseEvent) => {
+    const box = document.getElementById('regionalMap');
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    const offsetX = e.clientX - getOffsetLeft(box);
+    const offsetY = e.clientY - getOffsetTop(box);
+    const offsetPerX = offsetX / box!.offsetWidth;
+    const offsetPerY = offsetY / box!.offsetHeight;
+    console.log(
+      'e',
+      `(${clientX},${clientY})`,
+      `(${offsetX},${offsetY})`,
+      `${offsetPerX},${offsetPerY}`,
+    );
+    const div = document.createElement('div');
+    div.id = 'container';
+    document.getElementById('containerr')?.appendChild(div);
+    setIsInnerMap(true);
+    DrawInnerMap();
+  };
+
   useEffect(() => {
-    setInterval(() => {
-      setDateTime(moment().format('HH:mm:ss\xa0\xa0YYYY年M月D日\xa0\xa0dddd'));
-    }, 1000);
     runtimeRef.current.leftTabsInterval = setInterval(changeLeftTab, 2000);
     runtimeRef.current.scrollTableInterval = setInterval(tableScroll, 2000);
   }, []);
@@ -382,97 +659,9 @@ const IndexPage: React.FC = () => {
   //   });
   // }, []);
 
-  useLayoutEffect(() => {
-    G6.registerNode(
-      'breath-node',
-      {
-        afterDraw(cfg: any, group: any) {
-          if (cfg.error) {
-            console.log('cfg', cfg, group);
-            const r = cfg.size / 2;
-            const back1 = group.addShape('circle', {
-              zIndex: -3,
-              attrs: {
-                x: 0,
-                y: 0,
-                r,
-                fill: cfg.color || (cfg.style && cfg.style.fill),
-                opacity: 0.6,
-              },
-              name: 'back1-shape',
-            });
-            group.sort(); // 排序，根据zIndex 排序
-            const delayBase = Math.random() * 2000;
-            back1.animate(
-              {
-                // 逐渐放大，并消失
-                r: r + 10,
-                opacity: 0.0,
-              },
-              {
-                repeat: true, // 循环
-                duration: 3000,
-                easing: 'easeCubic',
-                delay: delayBase, // 无延迟
-              },
-            );
-          }
-        },
-      },
-      'circle',
-    );
-
-    const graph = new G6.Graph({
-      container: 'container',
-      width: 500,
-      height: 500,
-      modes: {
-        default: [
-          {
-            type: 'tooltip',
-            formatText: function formatText(model) {
-              console.log('model', model);
-              return `<div>ID: ${model.id}</div>
-              <div>位置: (${model.x},${model.y})</div>`;
-            },
-            shouldUpdate: (e) => true,
-          },
-        ],
-      },
-      defaultNode: {
-        type: 'breath-node',
-        size: 5,
-        style: {
-          lineWidth: 0,
-          fill: 'rgb(240, 223, 83)',
-        },
-      },
-    });
-    graph.data({ nodes: n });
-    graph.render();
-    // fetch('https://gw.alipayobjects.com/os/basement_prod/8c2353b0-99a9-4a93-a5e1-3e7df1eac64f.json')
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     const nodes = data.nodes;
-    //     // const classMap = new Map();
-    //     // let classId = 0;
-    //     nodes.forEach(function (node) {
-    //       node.y = -node.y;
-    //     });
-    //     scaleNodesPoints(nodes, graphSize);
-    //     console.log('data', data)
-    //     // graph.data(data);
-    //     graph.data({ nodes: n })
-    //     graph.render();
-    //   });
-
-    graph.on('node:click', (e) => console.log('e', e));
-
-    graph.get('container').style.backgroundImage =
-      'url("https://gw.alipayobjects.com/mdn/rms_f8c6a0/afts/img/A*G23iRqkiibIAAAAAAAAAAABkARQnAQ")';
-    graph.get('container').style.backgroundSize = '500px 500px';
-    graph.get('container').style.backgroundRepeat = 'no-repeat';
-  }, []);
+  // useLayoutEffect(() => {
+  //   DrawInnerMap();
+  // }, []);
 
   return (
     <>
@@ -482,7 +671,7 @@ const IndexPage: React.FC = () => {
       <div className={styles.main}>
         <div className={styles.top}>
           <div className={styles.topLeft}>
-            <div className={styles.dateTime}>{dateTime}</div>
+            <DateTime />
           </div>
           <div className={styles.topMiddle}>
             <div className={styles.title}>宁波港动环监控平台</div>
@@ -648,7 +837,30 @@ const IndexPage: React.FC = () => {
             </div>
           </div>
           <div className={styles.bodyMiddle}>
-            <div className={styles.innerMap} id="container"></div>
+            <div
+              className={styles.regionalMap}
+              id="regionalMap"
+              style={{ display: isInnerMap ? 'none' : 'block' }}
+              onClick={mapClick}
+            >
+              <FlylineChart points={points} lines={lines} />
+            </div>
+            <div
+              className={styles.innerMap}
+              id="containerr"
+              style={{ display: isInnerMap ? 'block' : 'none' }}
+            >
+              <LeftCircleOutlined
+                style={{
+                  color: '#fff',
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                }}
+                onClick={removeInnerMap}
+                title="返回"
+              />
+            </div>
             <div
               className={styles.middleBottom}
               style={{ height: bottomBoxUp ? 600 : 220 }}
@@ -692,7 +904,7 @@ const IndexPage: React.FC = () => {
                   <ScrollTable
                     data={bottomData}
                     slidesToShow={
-                      bottomBoxUp ? getScrollLimit(10) : getScrollLimit(2)
+                      bottomBoxUp ? getScrollLimit(12) : getScrollLimit(3)
                     }
                     scrollPause={scrollPause}
                   />
@@ -716,6 +928,9 @@ const IndexPage: React.FC = () => {
             <div className={styles.rightBottom}>
               <div className={styles.content}>
                 <div className={styles.contentTitle}>历史告警统计</div>
+                <div className={styles.historyArea}>
+                  <HistoryDualAxes data={data} />
+                </div>
               </div>
             </div>
           </div>
