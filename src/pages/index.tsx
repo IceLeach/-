@@ -1,4 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Helmet } from 'umi';
 import { Progress, Select, Tabs } from 'antd';
 import {
@@ -18,6 +24,9 @@ import DateTime from './components/DateTime';
 // @ts-ignore
 import logo from '@/assets/logo.ico';
 import mapCenterPoint from '@/assets/mapCenterPoint.png';
+import mapTop1 from '@/assets/mapTop1.png';
+import mapTop2 from '@/assets/mapTop2.png';
+import mapTop3 from '@/assets/mapTop3.png';
 import styles from './index.less';
 
 interface runtimeRefType {
@@ -272,8 +281,8 @@ const data = [
 
 const points = [
   {
-    name: '郑州',
-    coordinate: [0.48, 0.35],
+    name: '宁波港大厦中心机房',
+    coordinate: [500.40000915527344, 275.4214321683765],
     icon: {
       src: mapCenterPoint,
       width: 30,
@@ -284,64 +293,100 @@ const points = [
     },
   },
   {
-    name: '新乡',
-    coordinate: [0.52, 0.23],
+    name: '宁波联通讯中心机房',
+    coordinate: [198, 280.7001912282417],
   },
   {
-    name: '焦作',
-    coordinate: [0.43, 0.29],
+    name: '宁波环球航运中心机房',
+    coordinate: [198, 307.71946317684984],
   },
   {
-    name: '开封',
-    coordinate: [0.59, 0.35],
+    name: '梅东通过机房',
+    coordinate: [666, 406.79012698841296],
   },
   {
-    name: '许昌',
-    coordinate: [0.53, 0.47],
+    name: '北二集司通信机房',
+    coordinate: [601, 309.2205338406614],
+    text: {
+      offset: [0, 25],
+    },
   },
   {
-    name: '平顶山',
-    coordinate: [0.45, 0.54],
+    name: '北三集司（远东)通信机房',
+    coordinate: [624, 312.2226751682845],
+    text: {
+      offset: [80, 0],
+    },
   },
   {
-    name: '洛阳',
-    coordinate: [0.36, 0.38],
+    name: '北三集司（港吉）通信机房',
+    coordinate: [571, 304.7173218492267],
+    text: {
+      offset: [-50, 15],
+    },
   },
   {
-    name: '周口',
-    coordinate: [0.62, 0.55],
+    name: '大榭招商通信机房',
+    // coordinate: [0.62, 0.55],
+    coordinate: [613, 255.18201284796575],
+  },
+  {
+    name: '桃花岛引航通信基地机房',
+    coordinate: [826, 375],
   },
 ];
 const lines = [
   {
-    source: '新乡',
-    target: '郑州',
+    source: '宁波联通讯中心机房',
+    target: '宁波港大厦中心机房',
   },
   {
-    source: '焦作',
-    target: '郑州',
+    source: '宁波环球航运中心机房',
+    target: '宁波港大厦中心机房',
   },
   {
-    source: '开封',
-    target: '郑州',
+    source: '梅东通过机房',
+    target: '宁波港大厦中心机房',
   },
   {
-    source: '许昌',
-    target: '郑州',
+    source: '北二集司通信机房',
+    target: '宁波港大厦中心机房',
   },
   {
-    source: '平顶山',
-    target: '郑州',
+    source: '北三集司（远东)通信机房',
+    target: '宁波港大厦中心机房',
   },
   {
-    source: '洛阳',
-    target: '郑州',
+    source: '北三集司（港吉）通信机房',
+    target: '宁波港大厦中心机房',
   },
   {
-    source: '周口',
-    target: '郑州',
+    source: '大榭招商通信机房',
+    target: '宁波港大厦中心机房',
     color: '#fb7293',
   },
+  {
+    source: '桃花岛引航通信基地机房',
+    target: '宁波港大厦中心机房',
+  },
+];
+
+const rightTabsData = [
+  '1号机房',
+  '2号机房',
+  '3号机房',
+  '4号机房',
+  '5号机房',
+  '6号机房',
+  '7号机房',
+  '8号机房',
+  '9号机房',
+  '10号机房',
+  '11号机房',
+  '12号机房',
+  '13号机房',
+  '14号机房',
+  '15号机房',
 ];
 
 const IndexPage: React.FC = () => {
@@ -355,6 +400,33 @@ const IndexPage: React.FC = () => {
     leftTabsInterval: null,
     scrollTableInterval: null,
   });
+  const ws = useRef<WebSocket | null>(null);
+  const [message, setMessage] = useState('');
+  const [readyState, setReadyState] = useState('正在链接中');
+
+  const webSocketInit = useCallback(() => {
+    const stateArr = [
+      '正在链接中',
+      '已经链接并且可以通讯',
+      '连接正在关闭',
+      '连接已关闭或者没有链接成功',
+    ];
+    if (!ws.current || ws.current.readyState === 3) {
+      ws.current = new WebSocket(''); // ws://localhost:7070
+      ws.current.onopen = (_e) =>
+        setReadyState(stateArr[ws.current?.readyState ?? 0]);
+      ws.current.onclose = (_e) =>
+        setReadyState(stateArr[ws.current?.readyState ?? 0]);
+      ws.current.onerror = (e) =>
+        setReadyState(stateArr[ws.current?.readyState ?? 0]);
+      ws.current.onmessage = (e) => {
+        setMessage(e.data || e);
+      };
+    }
+  }, [ws]);
+  const closeWebSocket = useCallback(() => {
+    ws.current?.close();
+  }, [ws]);
 
   // const columns = [
   //   {
@@ -838,12 +910,33 @@ const IndexPage: React.FC = () => {
           </div>
           <div className={styles.bodyMiddle}>
             <div
-              className={styles.regionalMap}
-              id="regionalMap"
-              style={{ display: isInnerMap ? 'none' : 'block' }}
-              onClick={mapClick}
+              className={styles.outerMap}
+              style={{ display: isInnerMap ? 'none' : 'flex' }}
             >
-              <FlylineChart points={points} lines={lines} />
+              <div className={styles.mapHeader}>
+                <div className={styles.headerItem}>
+                  <img src={mapTop1} />
+                  <div className={styles.itemTitle}>接入节点数</div>
+                  <div className={styles.itemNumber}>0008</div>
+                </div>
+                <div className={styles.headerItem}>
+                  <img src={mapTop2} />
+                  <div className={styles.itemTitle}>接入机房数</div>
+                  <div className={styles.itemNumber}>0012</div>
+                </div>
+                <div className={styles.headerItem}>
+                  <img src={mapTop3} />
+                  <div className={styles.itemTitle}>接入设备数</div>
+                  <div className={styles.itemNumber}>0958</div>
+                </div>
+              </div>
+              <div
+                className={styles.regionalMap}
+                id="regionalMap"
+                onClick={mapClick}
+              >
+                <FlylineChart points={points} lines={lines} />
+              </div>
             </div>
             <div
               className={styles.innerMap}
@@ -923,6 +1016,17 @@ const IndexPage: React.FC = () => {
             <div className={styles.rightTop}>
               <div className={styles.content}>
                 <div className={styles.contentTitle}>温湿度</div>
+                {/* <div className={styles.tabs}>
+                  <Tabs
+                    type="card"
+                    className={`${styles.tab} ${styles.wrapTab}`}
+                  // onChange={(activeKey) => setLeftActiveKey(activeKey)}
+                  >
+                    {rightTabsData.map((data, i) => (
+                      <Tabs.TabPane tab={data} key={i}></Tabs.TabPane>
+                    ))}
+                  </Tabs>
+                </div> */}
               </div>
             </div>
             <div className={styles.rightBottom}>

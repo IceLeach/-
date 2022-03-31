@@ -1,8 +1,7 @@
 import React from 'react';
 // @ts-ignore
 import { FlylineChartEnhanced } from '@jiaminghi/data-view-react';
-// @ts-ignore
-import map from '@/assets/map.jpg';
+import map from '@/assets/nMap1.png';
 import mapPoint from '@/assets/mapPoint.png';
 
 interface FlylineChartProps {
@@ -16,6 +15,7 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
   return (
     <FlylineChartEnhanced
       config={{
+        relative: false,
         points,
         lines,
         icon: {

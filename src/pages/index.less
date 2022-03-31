@@ -1,13 +1,11 @@
 .main {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
   background: url('../assets/bg.png') no-repeat;
   background-size: 100% 100%;
   .top {
     width: 100%;
-    height: 115px;
+    height: 12%;
     background: url('../assets/top.png') no-repeat;
     background-size: 100% 100%;
     display: flex;
@@ -19,8 +17,8 @@
       align-items: center;
     }
     .topMiddle {
+      width: 46%;
       height: 85%;
-      flex-grow: 1;
       .title {
         font-size: 54px;
         font-family: FZSKJW--GB1-0, FZSKJW--GB1;
@@ -42,22 +40,22 @@
     }
   }
   .body {
-    flex-grow: 1;
+    height: 88%;
     display: flex;
-    padding: 0 0 40px;
+    padding: 0 0 2%;
     .bodyLeft {
-      margin: 0 16px;
+      margin: 0 0.95%;
       width: 450px;
       display: flex;
       flex-direction: column;
       .leftTop {
         height: 34%;
-        margin: 0 0 30px;
+        margin: 0 0 6.8%;
         background: rgba(0, 36, 84, 0.24);
         border: 2px solid #3079df;
         .content {
           height: 100%;
-          padding: 18px 0;
+          padding: 4% 0;
           display: flex;
           flex-direction: column;
           .contentTitle {
@@ -116,7 +114,7 @@
         }
       }
       .leftBottom {
-        flex-grow: 1;
+        height: 69.2%;
         background: rgba(0, 36, 84, 0.24);
         border: 2px solid #3079df;
         .content {
@@ -184,9 +182,40 @@
       display: flex;
       justify-content: center;
       position: relative;
-      .regionalMap {
-        width: 500px;
-        height: 500px;
+      .outerMap {
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        .mapHeader {
+          pointer-events: none;
+          margin: 8px 35px;
+          display: flex;
+          position: absolute;
+          .headerItem {
+            margin: 0 18px;
+            position: relative;
+            > img {
+              width: 230px;
+            }
+            .itemTitle {
+              color: #fff;
+              position: absolute;
+              top: 2px;
+              left: 130px;
+            }
+            .itemNumber {
+              color: #fff;
+              position: absolute;
+              top: 30px;
+              left: 112px;
+              font-size: 48px;
+            }
+          }
+        }
+        .regionalMap {
+          width: 900px;
+          height: 700px;
+        }
       }
       .innerMap {
         // height: 800px;
@@ -293,6 +322,20 @@
           padding: 18px 0;
           display: flex;
           flex-direction: column;
+          .tabs {
+            margin: 8px 20px 0;
+          }
+          .wrapTab {
+            :global {
+              .ant-tabs-nav-list {
+                flex-wrap: wrap;
+                .ant-tabs-tab {
+                  padding: 2px 4px;
+                  line-height: 24px;
+                }
+              }
+            }
+          }
         }
       }
       .rightBottom {
