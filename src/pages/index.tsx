@@ -12,22 +12,24 @@ import {
   CaretUpOutlined,
   LeftCircleOutlined,
 } from '@ant-design/icons';
-import { Area } from '@ant-design/plots';
 // import { Scene, LineLayer, PointLayer } from '@antv/l7';
 // import { Mapbox, GaodeMap } from '@antv/l7-maps';
 import G6, { Graph } from '@antv/g6';
-import ScrollTable, { scrollRef } from './components/ScrollTable';
+// import ScrollTable, { scrollRef } from './components/ScrollTable';
 import StateCard from './components/StateCard';
 import HistoryDualAxes from './components/HistoryDualAxes';
 import FlylineChart from './components/FlylineChart';
 import DateTime from './components/DateTime';
+import AlarmTable from './components/AlarmTable';
 // @ts-ignore
 import logo from '@/assets/logo.ico';
 import mapCenterPoint from '@/assets/mapCenterPoint.png';
 import mapTop1 from '@/assets/mapTop1.png';
 import mapTop2 from '@/assets/mapTop2.png';
 import mapTop3 from '@/assets/mapTop3.png';
+import errorPoint from '@/assets/errorPoint.png';
 import styles from './index.less';
+import KWHArea from './components/KWHArea';
 
 interface runtimeRefType {
   leftTabsInterval: NodeJS.Timer | null;
@@ -49,36 +51,43 @@ const leftSelectData = [
   },
 ];
 const leftAreaData = [
-  { type: '市电', month: '1月', percent: 50 },
-  { type: '市电', month: '2月', percent: 40 },
-  { type: '市电', month: '3月', percent: 60 },
-  { type: '市电', month: '4月', percent: 70 },
-  { type: '市电', month: '5月', percent: 20 },
-  { type: '市电', month: '6月', percent: 30 },
-  { type: 'UPS', month: '1月', percent: 30 },
-  { type: 'UPS', month: '2月', percent: 20 },
-  { type: 'UPS', month: '3月', percent: 10 },
-  { type: 'UPS', month: '4月', percent: 30 },
-  { type: 'UPS', month: '5月', percent: 50 },
-  { type: 'UPS', month: '6月', percent: 30 },
-  { type: '空调', month: '1月', percent: 40 },
-  { type: '空调', month: '2月', percent: 70 },
-  { type: '空调', month: '3月', percent: 60 },
-  { type: '空调', month: '4月', percent: 20 },
-  { type: '空调', month: '5月', percent: 30 },
-  { type: '空调', month: '6月', percent: 20 },
+  { type: '市电', month: '1', percent: 50 },
+  { type: '市电', month: '2', percent: 40 },
+  { type: '市电', month: '3', percent: 60 },
+  { type: '市电', month: '4', percent: 70 },
+  { type: '市电', month: '5', percent: 20 },
+  { type: '市电', month: '6', percent: 30 },
+  { type: '市电', month: '7', percent: 50 },
+  { type: '市电', month: '8', percent: 40 },
+  { type: '市电', month: '9', percent: 60 },
+  { type: '市电', month: '10', percent: 70 },
+  { type: '市电', month: '11', percent: 20 },
+  { type: '市电', month: '12', percent: 30 },
+  { type: 'UPS', month: '1', percent: 30 },
+  { type: 'UPS', month: '2', percent: 20 },
+  { type: 'UPS', month: '3', percent: 10 },
+  { type: 'UPS', month: '4', percent: 30 },
+  { type: 'UPS', month: '5', percent: 50 },
+  { type: 'UPS', month: '6', percent: 30 },
+  { type: 'UPS', month: '7', percent: 30 },
+  { type: 'UPS', month: '8', percent: 20 },
+  { type: 'UPS', month: '9', percent: 10 },
+  { type: 'UPS', month: '10', percent: 30 },
+  { type: 'UPS', month: '11', percent: 50 },
+  { type: 'UPS', month: '12', percent: 30 },
+  { type: '空调', month: '1', percent: 40 },
+  { type: '空调', month: '2', percent: 70 },
+  { type: '空调', month: '3', percent: 60 },
+  { type: '空调', month: '4', percent: 20 },
+  { type: '空调', month: '5', percent: 30 },
+  { type: '空调', month: '6', percent: 20 },
+  { type: '空调', month: '7', percent: 40 },
+  { type: '空调', month: '8', percent: 70 },
+  { type: '空调', month: '9', percent: 60 },
+  { type: '空调', month: '10', percent: 20 },
+  { type: '空调', month: '11', percent: 30 },
+  { type: '空调', month: '12', percent: 20 },
 ];
-// const mapData = `"start station latitude","start station longitude","end station latitude","end station longitude"
-// 29.877092,121.568418,29.916719,121.855605
-// 29.926684,121.871374,29.916719,121.855605
-// 29.926382,121.94271,29.916719,121.855605
-// 29.891641,122.0536,29.916719,121.855605`;
-// const testPoints = `"start station latitude","start station longitude"
-// 29.916719,121.855605
-// 29.877092,121.568418
-// 29.926684,121.871374
-// 29.926382,121.94271
-// 29.891641,122.0536`
 
 const n = [
   {
@@ -327,8 +336,10 @@ const points = [
   },
   {
     name: '大榭招商通信机房',
-    // coordinate: [0.62, 0.55],
     coordinate: [613, 255.18201284796575],
+    icon: {
+      src: errorPoint,
+    },
   },
   {
     name: '桃花岛引航通信基地机房',
@@ -364,6 +375,8 @@ const lines = [
     source: '大榭招商通信机房',
     target: '宁波港大厦中心机房',
     color: '#fb7293',
+    orbitColor: '#fb7293',
+    width: 2,
   },
   {
     source: '桃花岛引航通信基地机房',
@@ -371,31 +384,16 @@ const lines = [
   },
 ];
 
-const rightTabsData = [
-  '1号机房',
-  '2号机房',
-  '3号机房',
-  '4号机房',
-  '5号机房',
-  '6号机房',
-  '7号机房',
-  '8号机房',
-  '9号机房',
-  '10号机房',
-  '11号机房',
-  '12号机房',
-  '13号机房',
-  '14号机房',
-  '15号机房',
-];
+const rightTabsData = ['1-5', '6-10', '11-15'];
 
 const IndexPage: React.FC = () => {
   const [leftActiveKey, setLeftActiveKey] = useState<string>('1');
   const [leftSelectKey, setLeftSelectKey] = useState<string>('1');
   const [bottomBoxUp, setBottomBoxUp] = useState<boolean>(false);
-  const [scrollPause, setScrollPause] = useState<boolean>(false);
+  // const [scrollPause, setScrollPause] = useState<boolean>(false);
   const [isInnerMap, setIsInnerMap] = useState<boolean>(false);
   const [innerGraph, setInnerGraph] = useState<Graph | null>(null);
+  const [weatherData, setWeatherData] = useState<any>({});
   const runtimeRef = useRef<runtimeRefType>({
     leftTabsInterval: null,
     scrollTableInterval: null,
@@ -428,33 +426,13 @@ const IndexPage: React.FC = () => {
     ws.current?.close();
   }, [ws]);
 
-  // const columns = [
-  //   {
-  //     title: '设备',
-  //     dataIndex: 'name',
-  //     render: (_: any, record: any) => (<div className='td'>{record.name}</div>),
-  //   },
-  //   {
-  //     title: '所在机房',
-  //     dataIndex: 'address',
-  //     render: (_: any, record: any) => (<div className='td'>{record.address}</div>),
-  //   },
-  //   {
-  //     title: '内容',
-  //     dataIndex: 'content',
-  //     render: (_: any, record: any) => (<div className='td'>{record.content}</div>),
-  //   },
-  //   {
-  //     title: '时间',
-  //     dataIndex: 'dateTime',
-  //     render: (_: any, record: any) => (<div className='td'>{record.dateTime}</div>),
-  //   },
-  //   {
-  //     title: '事件级别',
-  //     dataIndex: 'state',
-  //     render: (_: any, record: any) => (<div className='td'>{record.state}</div>),
-  //   },
-  // ];
+  useEffect(() => {
+    console.log('w', window.screen.width);
+    // @ts-ignore
+    document.getElementById('main')!.style.zoom = `${
+      window.screen.width / 1920
+    }`;
+  }, [window.screen.width]);
 
   // const [data, setData] = useState([]);
 
@@ -469,14 +447,29 @@ const IndexPage: React.FC = () => {
 
   // useEffect(() => {
   //   const cityCode = '101210401';
-  //   const url = `/weather/data/cityinfo/${cityCode}.html`
+  //   const url = `/weather/data/cityinfo/${cityCode}.html`;
+  //   // const url = `/weather/data/sk/${cityCode}.html`;
   //   fetch(url).then(res => {
   //     // console.log('res', res)
   //     res.json().then(resJson => {
   //       console.log('resJson', resJson)
-  //     })
-  //   })
+  //       setWeatherData(resJson?.weatherinfo ?? {});
+  //     });
+  //   });
   // }, []);
+  const getWeather = () => {
+    const cityCode = '101210401';
+    const url = `/weather/data/cityinfo/${cityCode}.html`;
+    // const url = `/weather/data/sk/${cityCode}.html`;
+    fetch(url).then((res) => {
+      // console.log('res', res)
+      res.json().then((resJson) => {
+        console.log('resJson', resJson);
+        setWeatherData(resJson?.weatherinfo ?? {});
+      });
+    });
+  };
+
   const changeLeftTab = () => {
     setLeftActiveKey((activeKey) => {
       if (activeKey === '1') {
@@ -492,22 +485,22 @@ const IndexPage: React.FC = () => {
       }
     });
   };
-  const tableScroll = () => {
-    scrollRef && scrollRef.slickNext();
-  };
+  // const tableScroll = () => {
+  //   scrollRef && scrollRef.slickNext();
+  // };
   const clearRefInterval = (interval: NodeJS.Timer | null) => {
     if (interval) {
       clearInterval(interval);
     }
   };
 
-  const getScrollLimit = (maxCount: number) => {
-    if (bottomData.length >= maxCount) {
-      return maxCount;
-    } else {
-      return bottomData.length;
-    }
-  };
+  // const getScrollLimit = (maxCount: number) => {
+  //   if (bottomData.length >= maxCount) {
+  //     return maxCount;
+  //   } else {
+  //     return bottomData.length;
+  //   }
+  // };
 
   const DrawInnerMap = () => {
     G6.registerNode(
@@ -647,100 +640,17 @@ const IndexPage: React.FC = () => {
 
   useEffect(() => {
     runtimeRef.current.leftTabsInterval = setInterval(changeLeftTab, 2000);
-    runtimeRef.current.scrollTableInterval = setInterval(tableScroll, 2000);
+    getWeather();
+    setInterval(getWeather, 3600000);
+    // runtimeRef.current.scrollTableInterval = setInterval(tableScroll, 2000);
   }, []);
-
-  // useLayoutEffect(() => {
-  //   const scene = new Scene({
-  //     id: 'amap',
-  //     map: new Mapbox({
-  //       pitch: 45,
-  //       type: 'mapbox',
-  //       style: 'light',
-  //       center: [121.855605, 29.916719],
-  //       zoom: 10,
-  //       stencil: true
-  //     })
-  //     // map: new GaodeMap({
-  //     //   style: 'dark', // 样式URL
-  //     //   center: [121.855605, 29.916719],
-  //     //   // center: [-74.06967, 40.720399],
-  //     //   pitch: 30,
-  //     //   zoom: 10,
-  //     //   token: '8d061d84f0f5aa06e467f33c2153dedf',
-  //     // })
-  //   });
-  //   scene.on('loaded', () => {
-  //     const pointLayer = new PointLayer()
-  //       .source(testPoints, {
-  //         parser: {
-  //           type: 'csv',
-  //           x: 'start station longitude',
-  //           y: 'start station latitude',
-  //         }
-  //       })
-  //       .animate(true)
-  //       .size(30)
-  //       .shape('circle')
-  //       .color('red')
-  //       .on('click', (e) => console.log('e', e))
-  //     const lineLayer = new LineLayer({})
-  //       .source(mapData, {
-  //         parser: {
-  //           type: 'csv',
-  //           x: 'start station longitude',
-  //           y: 'start station latitude',
-  //           x1: 'end station longitude',
-  //           y1: 'end station latitude'
-  //         }
-  //       })
-  //       .size(1)
-  //       .shape('arc3d')
-  //       .color('#0C47BF')
-  //       .style({
-  //         opacity: 1,
-  //         blur: 0.9,
-  //       });
-  //     scene.addLayer(pointLayer);
-  //     scene.addLayer(lineLayer);
-  //     // fetch(
-  //     //   'https://gw.alipayobjects.com/os/basement_prod/bd33a685-a17e-4686-bc79-b0e6a89fd950.csv'
-  //     // )
-  //     //   .then(res => res.text())
-  //     //   .then(data => {
-  //     //     console.log(data, typeof (data))
-  //     //     const layer = new LineLayer({})
-  //     //       .source(data, {
-  //     //         parser: {
-  //     //           type: 'csv',
-  //     //           x: 'start station longitude',
-  //     //           y: 'start station latitude',
-  //     //           x1: 'end station longitude',
-  //     //           y1: 'end station latitude'
-  //     //         }
-  //     //       })
-  //     //       .size(1)
-  //     //       .shape('arc3d')
-  //     //       .color('#0C47BF')
-  //     //       .style({
-  //     //         opacity: 1,
-  //     //         blur: 0.9
-  //     //       });
-  //     //     scene.addLayer(layer);
-  //     //   });
-  //   });
-  // }, []);
-
-  // useLayoutEffect(() => {
-  //   DrawInnerMap();
-  // }, []);
 
   return (
     <>
       <Helmet>
         <title>宁波港大屏</title>
       </Helmet>
-      <div className={styles.main}>
+      <div className={styles.main} id="main">
         <div className={styles.top}>
           <div className={styles.topLeft}>
             <DateTime />
@@ -749,6 +659,9 @@ const IndexPage: React.FC = () => {
             <div className={styles.title}>宁波港动环监控平台</div>
           </div>
           <div className={styles.topRight}>
+            <div className={styles.weather}>{`${weatherData.city ?? ''}  ${
+              weatherData.temp1 ?? ''
+            } - ${weatherData.temp2 ?? ''}  ${weatherData.weather ?? ''}`}</div>
             <img src={logo} className={styles.logo} />
           </div>
         </div>
@@ -892,18 +805,7 @@ const IndexPage: React.FC = () => {
                   </div>
                 </div>
                 <div className={styles.mapArea}>
-                  <Area
-                    data={leftAreaData}
-                    xField="month"
-                    yField="percent"
-                    seriesField="type"
-                    xAxis={{
-                      label: {
-                        offsetX: 10,
-                        rotate: 45,
-                      },
-                    }}
-                  />
+                  <KWHArea data={leftAreaData} />
                 </div>
               </div>
             </div>
@@ -975,39 +877,33 @@ const IndexPage: React.FC = () => {
                 </div>
                 <div
                   className={styles.scrollTable}
-                  onWheel={(e) => {
-                    if (e.nativeEvent.deltaY > 0) {
-                      scrollRef && scrollRef.slickNext();
-                    } else if (e.nativeEvent.deltaY < 0) {
-                      scrollRef && scrollRef.slickPrev();
-                    }
-                  }}
-                  onMouseEnter={() => {
-                    clearRefInterval(runtimeRef.current.scrollTableInterval);
-                    setScrollPause(true);
-                  }}
-                  onMouseLeave={() => {
-                    runtimeRef.current.scrollTableInterval = setInterval(
-                      tableScroll,
-                      2000,
-                    );
-                    setScrollPause(false);
-                  }}
+                  // onWheel={(e) => {
+                  //   if (e.nativeEvent.deltaY > 0) {
+                  //     scrollRef && scrollRef.slickNext();
+                  //   } else if (e.nativeEvent.deltaY < 0) {
+                  //     scrollRef && scrollRef.slickPrev();
+                  //   }
+                  // }}
+                  // onMouseEnter={() => {
+                  //   clearRefInterval(runtimeRef.current.scrollTableInterval);
+                  //   setScrollPause(true);
+                  // }}
+                  // onMouseLeave={() => {
+                  //   runtimeRef.current.scrollTableInterval = setInterval(
+                  //     tableScroll,
+                  //     2000,
+                  //   );
+                  //   setScrollPause(false);
+                  // }}
                 >
-                  <ScrollTable
+                  {/* <ScrollTable
                     data={bottomData}
                     slidesToShow={
                       bottomBoxUp ? getScrollLimit(12) : getScrollLimit(3)
                     }
                     scrollPause={scrollPause}
-                  />
-                  {/* <Table
-                    columns={columns}
-                    dataSource={bottomData}
-                    pagination={false}
-                    scroll={{ y: 200 }}
-                    className={styles.dataTable}
                   /> */}
+                  <AlarmTable data={bottomData} bottomBoxUp={bottomBoxUp} />
                 </div>
               </div>
             </div>
@@ -1016,17 +912,17 @@ const IndexPage: React.FC = () => {
             <div className={styles.rightTop}>
               <div className={styles.content}>
                 <div className={styles.contentTitle}>温湿度</div>
-                {/* <div className={styles.tabs}>
+                <div className={styles.tabs}>
                   <Tabs
                     type="card"
                     className={`${styles.tab} ${styles.wrapTab}`}
-                  // onChange={(activeKey) => setLeftActiveKey(activeKey)}
+                    // onChange={(activeKey) => setLeftActiveKey(activeKey)}
                   >
                     {rightTabsData.map((data, i) => (
                       <Tabs.TabPane tab={data} key={i}></Tabs.TabPane>
                     ))}
                   </Tabs>
-                </div> */}
+                </div>
               </div>
             </div>
             <div className={styles.rightBottom}>
