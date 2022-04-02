@@ -1,5 +1,6 @@
 import React from 'react';
 import { Table } from 'antd';
+import StateTag from '../StateTag';
 import styles from './index.less';
 
 interface AlarmTableProps {
@@ -40,7 +41,11 @@ const AlarmTable: React.FC<AlarmTableProps> = (props) => {
     {
       title: '事件级别',
       dataIndex: 'state',
-      render: (_: any, record: any) => <div className="td">{record.state}</div>,
+      render: (_: any, record: any) => (
+        <div className="td">
+          <StateTag text={`${record.state}级`} state={record.state} />
+        </div>
+      ),
     },
   ];
 
@@ -50,7 +55,7 @@ const AlarmTable: React.FC<AlarmTableProps> = (props) => {
       dataSource={data}
       pagination={false}
       rowKey="id"
-      scroll={{ y: bottomBoxUp ? 470 : 95 }}
+      scroll={{ y: bottomBoxUp ? 470 : 1000 }}
       className={styles.dataTable}
     />
   );

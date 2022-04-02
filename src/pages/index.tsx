@@ -12,8 +12,6 @@ import {
   CaretUpOutlined,
   LeftCircleOutlined,
 } from '@ant-design/icons';
-// import { Scene, LineLayer, PointLayer } from '@antv/l7';
-// import { Mapbox, GaodeMap } from '@antv/l7-maps';
 import G6, { Graph } from '@antv/g6';
 // import ScrollTable, { scrollRef } from './components/ScrollTable';
 import StateCard from './components/StateCard';
@@ -21,6 +19,7 @@ import HistoryDualAxes from './components/HistoryDualAxes';
 import FlylineChart from './components/FlylineChart';
 import DateTime from './components/DateTime';
 import AlarmTable from './components/AlarmTable';
+import THTable, { THTableRow } from './components/THTable';
 // @ts-ignore
 import logo from '@/assets/logo.ico';
 import mapCenterPoint from '@/assets/mapCenterPoint.png';
@@ -30,10 +29,17 @@ import mapTop3 from '@/assets/mapTop3.png';
 import errorPoint from '@/assets/errorPoint.png';
 import styles from './index.less';
 import KWHArea from './components/KWHArea';
+import a from '@/assets/a.png';
 
-interface runtimeRefType {
+interface RuntimeRefType {
   leftTabsInterval: NodeJS.Timer | null;
-  scrollTableInterval: NodeJS.Timer | null;
+  // scrollTableInterval: NodeJS.Timer | null;
+  rightTabsInterval: NodeJS.Timer | null;
+}
+interface RightTopDataType {
+  groupKey: string;
+  groupName: string;
+  groupData: THTableRow[];
 }
 
 const leftSelectData = [
@@ -109,7 +115,7 @@ const bottomData = [
     address: '1号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '1',
+    state: 1,
   },
   {
     id: '2',
@@ -117,7 +123,7 @@ const bottomData = [
     address: '1号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '1',
+    state: 1,
   },
   {
     id: '3',
@@ -125,7 +131,7 @@ const bottomData = [
     address: '1号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '1',
+    state: 2,
   },
   {
     id: '4',
@@ -133,7 +139,7 @@ const bottomData = [
     address: '2号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '2',
+    state: 2,
   },
   {
     id: '5',
@@ -141,7 +147,7 @@ const bottomData = [
     address: '2号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '2',
+    state: 3,
   },
   {
     id: '6',
@@ -149,7 +155,7 @@ const bottomData = [
     address: '2号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '2',
+    state: 3,
   },
   {
     id: '7',
@@ -157,7 +163,7 @@ const bottomData = [
     address: '3号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '3',
+    state: 4,
   },
   {
     id: '8',
@@ -165,7 +171,7 @@ const bottomData = [
     address: '3号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '3',
+    state: 4,
   },
   {
     id: '9',
@@ -173,7 +179,7 @@ const bottomData = [
     address: '3号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '3',
+    state: 5,
   },
   {
     id: '10',
@@ -181,7 +187,7 @@ const bottomData = [
     address: '4号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '4',
+    state: 5,
   },
   {
     id: '11',
@@ -189,7 +195,7 @@ const bottomData = [
     address: '4号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '4',
+    state: 6,
   },
   {
     id: '12',
@@ -197,7 +203,7 @@ const bottomData = [
     address: '4号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '4',
+    state: 6,
   },
   {
     id: '13',
@@ -205,7 +211,7 @@ const bottomData = [
     address: '5号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '5',
+    state: 7,
   },
   {
     id: '14',
@@ -213,7 +219,7 @@ const bottomData = [
     address: '5号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '5',
+    state: 7,
   },
   {
     id: '15',
@@ -221,7 +227,7 @@ const bottomData = [
     address: '5号机房',
     content: '内容',
     dateTime: '2022-03-28 15:00:00',
-    state: '5',
+    state: 7,
   },
 ];
 
@@ -384,19 +390,38 @@ const lines = [
   },
 ];
 
-const rightTabsData = ['1-5', '6-10', '11-15'];
+const rightTabsData = [
+  { id: '1', name: '机房1', temperature: 30, humidity: 20 },
+  { id: '2', name: '机房2', temperature: 30, humidity: 20 },
+  { id: '3', name: '机房3', temperature: 30, humidity: 20 },
+  { id: '4', name: '机房4', temperature: 30, humidity: 20 },
+  { id: '5', name: '机房5', temperature: 30, humidity: 20 },
+  { id: '6', name: '机房6', temperature: 30, humidity: 20 },
+  { id: '7', name: '机房7', temperature: 30, humidity: 20 },
+  { id: '8', name: '机房8', temperature: 30, humidity: 20 },
+  { id: '9', name: '机房9', temperature: 30, humidity: 20 },
+  { id: '10', name: '机房10', temperature: 30, humidity: 20 },
+  { id: '11', name: '机房11', temperature: 30, humidity: 20 },
+  { id: '12', name: '机房12', temperature: 30, humidity: 20 },
+  { id: '13', name: '机房13', temperature: 30, humidity: 20 },
+  { id: '14', name: '机房14', temperature: 30, humidity: 20 },
+  { id: '15', name: '机房15', temperature: 30, humidity: 20 },
+];
 
 const IndexPage: React.FC = () => {
   const [leftActiveKey, setLeftActiveKey] = useState<string>('1');
+  const [rightActiveKey, setRightActiveKey] = useState<string>('0');
   const [leftSelectKey, setLeftSelectKey] = useState<string>('1');
   const [bottomBoxUp, setBottomBoxUp] = useState<boolean>(false);
   // const [scrollPause, setScrollPause] = useState<boolean>(false);
   const [isInnerMap, setIsInnerMap] = useState<boolean>(false);
   const [innerGraph, setInnerGraph] = useState<Graph | null>(null);
   const [weatherData, setWeatherData] = useState<any>({});
-  const runtimeRef = useRef<runtimeRefType>({
+  const [rightTopData, setRightTopData] = useState<RightTopDataType[]>([]);
+  const runtimeRef = useRef<RuntimeRefType>({
     leftTabsInterval: null,
-    scrollTableInterval: null,
+    // scrollTableInterval: null,
+    rightTabsInterval: null,
   });
   const ws = useRef<WebSocket | null>(null);
   const [message, setMessage] = useState('');
@@ -485,6 +510,16 @@ const IndexPage: React.FC = () => {
       }
     });
   };
+  const changeRightTab = () => {
+    setRightActiveKey((activeKey) => {
+      const key: number = parseInt(activeKey);
+      if (key + 1 < rightTopData.length) {
+        return `${key + 1}`;
+      } else {
+        return '0';
+      }
+    });
+  };
   // const tableScroll = () => {
   //   scrollRef && scrollRef.slickNext();
   // };
@@ -493,6 +528,15 @@ const IndexPage: React.FC = () => {
       clearInterval(interval);
     }
   };
+
+  useEffect(() => {
+    if (runtimeRef.current.rightTabsInterval) {
+      clearRefInterval(runtimeRef.current.rightTabsInterval);
+    }
+    if (rightTopData.length > 0) {
+      runtimeRef.current.rightTabsInterval = setInterval(changeRightTab, 2000);
+    }
+  }, [rightTopData]);
 
   // const getScrollLimit = (maxCount: number) => {
   //   if (bottomData.length >= maxCount) {
@@ -544,8 +588,8 @@ const IndexPage: React.FC = () => {
 
     const graph = new G6.Graph({
       container: 'container',
-      width: 500,
-      height: 500,
+      width: 900,
+      height: 700,
       modes: {
         default: [
           {
@@ -587,9 +631,9 @@ const IndexPage: React.FC = () => {
 
     graph.on('node:click', (e) => console.log('e', e));
 
-    graph.get('container').style.backgroundImage =
-      'url("https://gw.alipayobjects.com/mdn/rms_f8c6a0/afts/img/A*G23iRqkiibIAAAAAAAAAAABkARQnAQ")';
-    graph.get('container').style.backgroundSize = '500px 500px';
+    graph.get('container').style.backgroundImage = `url(${a})`;
+    // graph.get('container').style.backgroundImage = 'url("https://gw.alipayobjects.com/mdn/rms_f8c6a0/afts/img/A*G23iRqkiibIAAAAAAAAAAABkARQnAQ")';
+    graph.get('container').style.backgroundSize = '900px 700px';
     graph.get('container').style.backgroundRepeat = 'no-repeat';
     setInnerGraph(graph);
     graph.render();
@@ -640,9 +684,22 @@ const IndexPage: React.FC = () => {
 
   useEffect(() => {
     runtimeRef.current.leftTabsInterval = setInterval(changeLeftTab, 2000);
+    // runtimeRef.current.rightTabsInterval = setInterval(changeRightTab, 2000);
     getWeather();
     setInterval(getWeather, 3600000);
     // runtimeRef.current.scrollTableInterval = setInterval(tableScroll, 2000);
+  }, []);
+
+  useEffect(() => {
+    const rtData: RightTopDataType[] = [];
+    for (let i = 0; i < Math.ceil(rightTabsData.length / 5); i += 1) {
+      rtData.push({
+        groupKey: `${i}`,
+        groupName: `${i * 5 + 1}-${(i + 1) * 5}号机房`,
+        groupData: rightTabsData.slice(i * 5, (i + 1) * 5),
+      });
+    }
+    setRightTopData(rtData);
   }, []);
 
   return (
@@ -656,7 +713,7 @@ const IndexPage: React.FC = () => {
             <DateTime />
           </div>
           <div className={styles.topMiddle}>
-            <div className={styles.title}>宁波港动环监控平台</div>
+            <div className={styles.title}>宁波舟山港动环监控平台</div>
           </div>
           <div className={styles.topRight}>
             <div className={styles.weather}>{`${weatherData.city ?? ''}  ${
@@ -845,12 +902,28 @@ const IndexPage: React.FC = () => {
               id="containerr"
               style={{ display: isInnerMap ? 'block' : 'none' }}
             >
+              <div
+                style={{
+                  color: '#fff',
+                  position: 'absolute',
+                  top: 0,
+                  width: '100%',
+                  textAlign: 'center',
+                  pointerEvents: 'none',
+                  fontSize: 28,
+                  fontWeight: 'bold',
+                }}
+              >
+                机房名称
+              </div>
               <LeftCircleOutlined
                 style={{
                   color: '#fff',
                   position: 'absolute',
                   top: 8,
                   right: 8,
+                  padding: 3,
+                  fontSize: 18,
                 }}
                 onClick={removeInnerMap}
                 title="返回"
@@ -910,16 +983,30 @@ const IndexPage: React.FC = () => {
           </div>
           <div className={styles.bodyRight}>
             <div className={styles.rightTop}>
-              <div className={styles.content}>
+              <div
+                className={styles.content}
+                onMouseEnter={() =>
+                  clearRefInterval(runtimeRef.current.rightTabsInterval)
+                }
+                onMouseLeave={() =>
+                  (runtimeRef.current.rightTabsInterval = setInterval(
+                    changeRightTab,
+                    2000,
+                  ))
+                }
+              >
                 <div className={styles.contentTitle}>温湿度</div>
                 <div className={styles.tabs}>
                   <Tabs
                     type="card"
                     className={`${styles.tab} ${styles.wrapTab}`}
-                    // onChange={(activeKey) => setLeftActiveKey(activeKey)}
+                    activeKey={rightActiveKey}
+                    onChange={(activeKey) => setRightActiveKey(activeKey)}
                   >
-                    {rightTabsData.map((data, i) => (
-                      <Tabs.TabPane tab={data} key={i}></Tabs.TabPane>
+                    {rightTopData.map((data) => (
+                      <Tabs.TabPane tab={data.groupName} key={data.groupKey}>
+                        <THTable data={data.groupData} />
+                      </Tabs.TabPane>
                     ))}
                   </Tabs>
                 </div>
