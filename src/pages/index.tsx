@@ -57,10 +57,6 @@ const leftSelectData = [
   },
 ];
 const leftAreaData = [
-  { type: '市电', month: '1', percent: 50 },
-  { type: '市电', month: '2', percent: 40 },
-  { type: '市电', month: '3', percent: 60 },
-  { type: '市电', month: '4', percent: 70 },
   { type: '市电', month: '5', percent: 20 },
   { type: '市电', month: '6', percent: 30 },
   { type: '市电', month: '7', percent: 50 },
@@ -69,10 +65,10 @@ const leftAreaData = [
   { type: '市电', month: '10', percent: 70 },
   { type: '市电', month: '11', percent: 20 },
   { type: '市电', month: '12', percent: 30 },
-  { type: 'UPS', month: '1', percent: 30 },
-  { type: 'UPS', month: '2', percent: 20 },
-  { type: 'UPS', month: '3', percent: 10 },
-  { type: 'UPS', month: '4', percent: 30 },
+  { type: '市电', month: '1', percent: 50 },
+  { type: '市电', month: '2', percent: 40 },
+  { type: '市电', month: '3', percent: 60 },
+  { type: '市电', month: '4', percent: 70 },
   { type: 'UPS', month: '5', percent: 50 },
   { type: 'UPS', month: '6', percent: 30 },
   { type: 'UPS', month: '7', percent: 30 },
@@ -81,10 +77,10 @@ const leftAreaData = [
   { type: 'UPS', month: '10', percent: 30 },
   { type: 'UPS', month: '11', percent: 50 },
   { type: 'UPS', month: '12', percent: 30 },
-  { type: '空调', month: '1', percent: 40 },
-  { type: '空调', month: '2', percent: 70 },
-  { type: '空调', month: '3', percent: 60 },
-  { type: '空调', month: '4', percent: 20 },
+  { type: 'UPS', month: '1', percent: 30 },
+  { type: 'UPS', month: '2', percent: 20 },
+  { type: 'UPS', month: '3', percent: 10 },
+  { type: 'UPS', month: '4', percent: 30 },
   { type: '空调', month: '5', percent: 30 },
   { type: '空调', month: '6', percent: 20 },
   { type: '空调', month: '7', percent: 40 },
@@ -93,6 +89,10 @@ const leftAreaData = [
   { type: '空调', month: '10', percent: 20 },
   { type: '空调', month: '11', percent: 30 },
   { type: '空调', month: '12', percent: 20 },
+  { type: '空调', month: '1', percent: 40 },
+  { type: '空调', month: '2', percent: 70 },
+  { type: '空调', month: '3', percent: 60 },
+  { type: '空调', month: '4', percent: 20 },
 ];
 
 const n = [
@@ -233,26 +233,6 @@ const bottomData = [
 
 const data = [
   {
-    time: '1月',
-    alarm: 52,
-    alarmLine: 52,
-  },
-  {
-    time: '2月',
-    alarm: 22,
-    alarmLine: 22,
-  },
-  {
-    time: '3月',
-    alarm: 48,
-    alarmLine: 48,
-  },
-  {
-    time: '4月',
-    alarm: 25,
-    alarmLine: 25,
-  },
-  {
     time: '5月',
     alarm: 9,
     alarmLine: 9,
@@ -291,6 +271,26 @@ const data = [
     time: '12月',
     alarm: 35,
     alarmLine: 35,
+  },
+  {
+    time: '1月',
+    alarm: 52,
+    alarmLine: 52,
+  },
+  {
+    time: '2月',
+    alarm: 22,
+    alarmLine: 22,
+  },
+  {
+    time: '3月',
+    alarm: 48,
+    alarmLine: 48,
+  },
+  {
+    time: '4月',
+    alarm: 25,
+    alarmLine: 25,
   },
 ];
 
@@ -455,9 +455,15 @@ const IndexPage: React.FC = () => {
     console.log('w', window.screen.width);
     // @ts-ignore
     document.getElementById('main')!.style.zoom = `${
-      window.screen.width / 1920
+      document.body.clientWidth / 1920
     }`;
-  }, [window.screen.width]);
+  }, [document.body.clientWidth]);
+
+  // useEffect(() => {
+  //   fetch('/api/getData')
+  //     .then(resData => resData.json())
+  //     .then(res => console.log('res', res))
+  // }, []);
 
   // const [data, setData] = useState([]);
 
@@ -737,7 +743,7 @@ const IndexPage: React.FC = () => {
                   ))
                 }
               >
-                <div className={styles.contentTitle}>用电状态</div>
+                <div className={styles.contentTitle}>设备状态</div>
                 <div className={styles.tabs}>
                   <Tabs
                     type="card"
