@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table } from 'antd';
+import { Empty, Table } from 'antd';
 import StateTag from '../StateTag';
 import styles from './index.less';
 
@@ -14,14 +14,16 @@ const AlarmTable: React.FC<AlarmTableProps> = (props) => {
   const columns = [
     {
       title: '设备',
-      dataIndex: 'name',
-      render: (_: any, record: any) => <div className="td">{record.name}</div>,
+      dataIndex: 'deviceName',
+      render: (_: any, record: any) => (
+        <div className="td">{record.deviceName}</div>
+      ),
     },
     {
       title: '所在机房',
-      dataIndex: 'address',
+      dataIndex: 'roomName',
       render: (_: any, record: any) => (
-        <div className="td">{record.address}</div>
+        <div className="td">{record.roomName}</div>
       ),
     },
     {
@@ -33,17 +35,17 @@ const AlarmTable: React.FC<AlarmTableProps> = (props) => {
     },
     {
       title: '时间',
-      dataIndex: 'dateTime',
+      dataIndex: 'startTime',
       render: (_: any, record: any) => (
-        <div className="td">{record.dateTime}</div>
+        <div className="td">{record.startTime}</div>
       ),
     },
     {
       title: '事件级别',
-      dataIndex: 'state',
+      dataIndex: 'level',
       render: (_: any, record: any) => (
         <div className="td">
-          <StateTag text={`${record.state}级`} state={record.state} />
+          <StateTag text={`${record.level}级`} state={parseInt(record.level)} />
         </div>
       ),
     },
@@ -54,6 +56,11 @@ const AlarmTable: React.FC<AlarmTableProps> = (props) => {
       columns={columns}
       dataSource={data}
       pagination={false}
+      locale={{
+        emptyText: (
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无告警" />
+        ),
+      }}
       rowKey="id"
       scroll={{ y: bottomBoxUp ? 470 : 1000 }}
       className={styles.dataTable}

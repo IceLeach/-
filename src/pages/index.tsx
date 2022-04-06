@@ -13,6 +13,15 @@ import {
   LeftCircleOutlined,
 } from '@ant-design/icons';
 import G6, { Graph } from '@antv/g6';
+import {
+  AlarmEventGetLatest,
+  AlarmEventGetSumList,
+  DeviceGetIndexNum,
+  DeviceGetPowerOfDevice,
+  DeviceGetSumList,
+  DeviceGetTypeList,
+  MapPointList,
+} from '@/services/api';
 // import ScrollTable, { scrollRef } from './components/ScrollTable';
 import StateCard from './components/StateCard';
 import HistoryDualAxes from './components/HistoryDualAxes';
@@ -42,20 +51,29 @@ interface RightTopDataType {
   groupData: THTableRow[];
 }
 
-const leftSelectData = [
-  {
-    key: '1',
-    name: '点位一',
-  },
-  {
-    key: '2',
-    name: '点位二',
-  },
-  {
-    key: '3',
-    name: '点位三',
-  },
-];
+interface DeviceSumListType {
+  normalNum: number;
+  faultNum: number;
+  type: string;
+}
+
+interface DeviceIndexNumType {
+  deviceNum: number;
+  monitorNum: number;
+  roomNum: number;
+}
+
+interface AlarmEventSumListType {
+  alarmMonth: number;
+  alarmNum: number;
+}
+
+interface ProgressDataType {
+  normalNum: number;
+  faultNum: number;
+  type: string;
+}
+
 const leftAreaData = [
   { type: '市电', month: '5', percent: 20 },
   { type: '市电', month: '6', percent: 30 },
@@ -107,191 +125,6 @@ const n = [
   { id: '2', x: 278.3592007497872, y: 336.54688051795773, error: false },
   { id: '3', x: 256.1948574264118, y: 111.97476803836841, error: false },
   { id: '4', x: 170.2285476653881, y: 366.2158066640094, error: false },
-];
-const bottomData = [
-  {
-    id: '1',
-    name: '设备1',
-    address: '1号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 1,
-  },
-  {
-    id: '2',
-    name: '设备2',
-    address: '1号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 1,
-  },
-  {
-    id: '3',
-    name: '设备3',
-    address: '1号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 2,
-  },
-  {
-    id: '4',
-    name: '设备4',
-    address: '2号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 2,
-  },
-  {
-    id: '5',
-    name: '设备5',
-    address: '2号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 3,
-  },
-  {
-    id: '6',
-    name: '设备6',
-    address: '2号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 3,
-  },
-  {
-    id: '7',
-    name: '设备7',
-    address: '3号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 4,
-  },
-  {
-    id: '8',
-    name: '设备8',
-    address: '3号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 4,
-  },
-  {
-    id: '9',
-    name: '设备9',
-    address: '3号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 5,
-  },
-  {
-    id: '10',
-    name: '设备10',
-    address: '4号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 5,
-  },
-  {
-    id: '11',
-    name: '设备11',
-    address: '4号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 6,
-  },
-  {
-    id: '12',
-    name: '设备12',
-    address: '4号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 6,
-  },
-  {
-    id: '13',
-    name: '设备13',
-    address: '5号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 7,
-  },
-  {
-    id: '14',
-    name: '设备14',
-    address: '5号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 7,
-  },
-  {
-    id: '15',
-    name: '设备15',
-    address: '5号机房',
-    content: '内容',
-    dateTime: '2022-03-28 15:00:00',
-    state: 7,
-  },
-];
-
-const data = [
-  {
-    time: '5月',
-    alarm: 9,
-    alarmLine: 9,
-  },
-  {
-    time: '6月',
-    alarm: 16,
-    alarmLine: 16,
-  },
-  {
-    time: '7月',
-    alarm: 10,
-    alarmLine: 10,
-  },
-  {
-    time: '8月',
-    alarm: 17,
-    alarmLine: 17,
-  },
-  {
-    time: '9月',
-    alarm: 16,
-    alarmLine: 16,
-  },
-  {
-    time: '10月',
-    alarm: 19,
-    alarmLine: 19,
-  },
-  {
-    time: '11月',
-    alarm: 22,
-    alarmLine: 22,
-  },
-  {
-    time: '12月',
-    alarm: 35,
-    alarmLine: 35,
-  },
-  {
-    time: '1月',
-    alarm: 52,
-    alarmLine: 52,
-  },
-  {
-    time: '2月',
-    alarm: 22,
-    alarmLine: 22,
-  },
-  {
-    time: '3月',
-    alarm: 48,
-    alarmLine: 48,
-  },
-  {
-    time: '4月',
-    alarm: 25,
-    alarmLine: 25,
-  },
 ];
 
 const points = [
@@ -409,47 +242,61 @@ const rightTabsData = [
 ];
 
 const IndexPage: React.FC = () => {
-  const [leftActiveKey, setLeftActiveKey] = useState<string>('1');
+  const [leftActiveKey, setLeftActiveKey] = useState<string>('0');
   const [rightActiveKey, setRightActiveKey] = useState<string>('0');
-  const [leftSelectKey, setLeftSelectKey] = useState<string>('1');
+  const [leftSelectKey, setLeftSelectKey] = useState<number | null>(null);
   const [bottomBoxUp, setBottomBoxUp] = useState<boolean>(false);
   // const [scrollPause, setScrollPause] = useState<boolean>(false);
   const [isInnerMap, setIsInnerMap] = useState<boolean>(false);
   const [innerGraph, setInnerGraph] = useState<Graph | null>(null);
   const [weatherData, setWeatherData] = useState<any>({});
   const [rightTopData, setRightTopData] = useState<RightTopDataType[]>([]);
+  const [mapData, setMapData] = useState<any[]>([]);
+  const [deviceTypeList, setDeviceTypeList] = useState<string[]>([]);
+  const [deviceSumList, setDeviceSumList] = useState<DeviceSumListType[]>([]);
+  const [deviceIndexNum, setDeviceIndexNum] = useState<DeviceIndexNumType>({
+    deviceNum: 0,
+    monitorNum: 0,
+    roomNum: 0,
+  });
+  const [alarmEventLatest, setAlarmEventLatest] = useState<any[]>([]);
+  const [alarmEventSumList, setAlarmEventSumList] = useState<
+    AlarmEventSumListType[]
+  >([]);
+  const [progressData, setProgressData] = useState<ProgressDataType[]>([]);
   const runtimeRef = useRef<RuntimeRefType>({
     leftTabsInterval: null,
     // scrollTableInterval: null,
     rightTabsInterval: null,
   });
-  const ws = useRef<WebSocket | null>(null);
-  const [message, setMessage] = useState('');
-  const [readyState, setReadyState] = useState('正在链接中');
 
-  const webSocketInit = useCallback(() => {
-    const stateArr = [
-      '正在链接中',
-      '已经链接并且可以通讯',
-      '连接正在关闭',
-      '连接已关闭或者没有链接成功',
-    ];
-    if (!ws.current || ws.current.readyState === 3) {
-      ws.current = new WebSocket(''); // ws://localhost:7070
-      ws.current.onopen = (_e) =>
-        setReadyState(stateArr[ws.current?.readyState ?? 0]);
-      ws.current.onclose = (_e) =>
-        setReadyState(stateArr[ws.current?.readyState ?? 0]);
-      ws.current.onerror = (e) =>
-        setReadyState(stateArr[ws.current?.readyState ?? 0]);
-      ws.current.onmessage = (e) => {
-        setMessage(e.data || e);
-      };
-    }
-  }, [ws]);
-  const closeWebSocket = useCallback(() => {
-    ws.current?.close();
-  }, [ws]);
+  // const ws = useRef<WebSocket | null>(null);
+  // const [message, setMessage] = useState('');
+  // const [readyState, setReadyState] = useState('正在链接中');
+
+  // const webSocketInit = useCallback(() => {
+  //   const stateArr = [
+  //     '正在链接中',
+  //     '已经链接并且可以通讯',
+  //     '连接正在关闭',
+  //     '连接已关闭或者没有链接成功',
+  //   ];
+  //   if (!ws.current || ws.current.readyState === 3) {
+  //     ws.current = new WebSocket(''); // ws://localhost:7070
+  //     ws.current.onopen = (_e) =>
+  //       setReadyState(stateArr[ws.current?.readyState ?? 0]);
+  //     ws.current.onclose = (_e) =>
+  //       setReadyState(stateArr[ws.current?.readyState ?? 0]);
+  //     ws.current.onerror = (e) =>
+  //       setReadyState(stateArr[ws.current?.readyState ?? 0]);
+  //     ws.current.onmessage = (e) => {
+  //       setMessage(e.data || e);
+  //     };
+  //   }
+  // }, [ws]);
+  // const closeWebSocket = useCallback(() => {
+  //   ws.current?.close();
+  // }, [ws]);
 
   useEffect(() => {
     console.log('w', window.screen.width);
@@ -459,35 +306,68 @@ const IndexPage: React.FC = () => {
     }`;
   }, [document.body.clientWidth]);
 
-  // useEffect(() => {
-  //   fetch('/api/getData')
-  //     .then(resData => resData.json())
-  //     .then(res => console.log('res', res))
-  // }, []);
+  useEffect(() => {
+    MapPointList().then((res) => {
+      if (res?.data?.length) {
+        setMapData(res.data);
+        const selectedPoint = res.data.find((d: any) => d.selected === 1);
+        setLeftSelectKey(selectedPoint ? selectedPoint.id : res.data[0].id);
+      }
+    });
+    DeviceGetTypeList().then((res) => {
+      if (res?.data?.length) {
+        setDeviceTypeList(res.data);
+      }
+    });
+    DeviceGetIndexNum().then((res) => {
+      if (res?.data) {
+        setDeviceIndexNum(res.data);
+      }
+    });
+    AlarmEventGetSumList().then((res) => {
+      if (res?.data) {
+        setAlarmEventSumList(res.data);
+      }
+    });
+  }, []);
 
-  // const [data, setData] = useState([]);
+  useEffect(() => {
+    const getDeviceSumListData = () => {
+      DeviceGetSumList().then((res) => {
+        if (res?.data?.length) {
+          setDeviceSumList(res.data);
+        }
+      });
+    };
+    const getAlarmEventLatest = () => {
+      AlarmEventGetLatest().then((res) => {
+        if (res?.data) {
+          setAlarmEventLatest(res.data);
+        }
+      });
+    };
+    getDeviceSumListData();
+    getAlarmEventLatest();
+    const deviceSumList = setInterval(getDeviceSumListData, 10000);
+    const alarmEvent = setInterval(getAlarmEventLatest, 10000);
 
-  // useEffect(() => {
-  //   fetch('https://gw.alipayobjects.com/os/bmw-prod/b21e7336-0b3e-486c-9070-612ede49284e.json')
-  //     .then((response) => response.json())
-  //     .then((json) => { console.log('data', json); setData(json) })
-  //     .catch((error) => {
-  //       console.log('fetch data failed', error);
-  //     });
-  // }, []);
+    return () => {
+      clearInterval(deviceSumList);
+      clearInterval(alarmEvent);
+    };
+  }, []);
 
-  // useEffect(() => {
-  //   const cityCode = '101210401';
-  //   const url = `/weather/data/cityinfo/${cityCode}.html`;
-  //   // const url = `/weather/data/sk/${cityCode}.html`;
-  //   fetch(url).then(res => {
-  //     // console.log('res', res)
-  //     res.json().then(resJson => {
-  //       console.log('resJson', resJson)
-  //       setWeatherData(resJson?.weatherinfo ?? {});
-  //     });
-  //   });
-  // }, []);
+  useEffect(() => {
+    if (leftSelectKey !== null) {
+      DeviceGetPowerOfDevice({ id: leftSelectKey }).then((res) => {
+        console.log('res', res);
+        if (res?.data) {
+          setProgressData(res.data);
+        }
+      });
+    }
+  }, [leftSelectKey]);
+
   const getWeather = () => {
     const cityCode = '101210401';
     const url = `/weather/data/cityinfo/${cityCode}.html`;
@@ -503,19 +383,23 @@ const IndexPage: React.FC = () => {
 
   const changeLeftTab = () => {
     setLeftActiveKey((activeKey) => {
-      if (activeKey === '1') {
-        return '2';
-      } else if (activeKey === '2') {
-        return '3';
-      } else if (activeKey === '3') {
-        return '4';
-      } else if (activeKey === '4') {
-        return '1';
+      const key: number = parseInt(activeKey);
+      if (key + 1 < deviceTypeList.length) {
+        return `${key + 1}`;
       } else {
-        return '1';
+        return '0';
       }
     });
   };
+  const startLeftTabsInterval = () => {
+    if (runtimeRef.current.leftTabsInterval) {
+      clearRefInterval(runtimeRef.current.leftTabsInterval);
+    }
+    if (deviceTypeList.length > 0) {
+      runtimeRef.current.leftTabsInterval = setInterval(changeLeftTab, 8000);
+    }
+  };
+
   const changeRightTab = () => {
     setRightActiveKey((activeKey) => {
       const key: number = parseInt(activeKey);
@@ -534,6 +418,10 @@ const IndexPage: React.FC = () => {
       clearInterval(interval);
     }
   };
+
+  useEffect(() => {
+    startLeftTabsInterval();
+  }, [deviceTypeList]);
 
   useEffect(() => {
     if (runtimeRef.current.rightTabsInterval) {
@@ -689,8 +577,6 @@ const IndexPage: React.FC = () => {
   };
 
   useEffect(() => {
-    runtimeRef.current.leftTabsInterval = setInterval(changeLeftTab, 2000);
-    // runtimeRef.current.rightTabsInterval = setInterval(changeRightTab, 2000);
     getWeather();
     setInterval(getWeather, 3600000);
     // runtimeRef.current.scrollTableInterval = setInterval(tableScroll, 2000);
@@ -707,6 +593,18 @@ const IndexPage: React.FC = () => {
     }
     setRightTopData(rtData);
   }, []);
+
+  const getNumberString = (num: number) => {
+    const numString = `${num}`;
+    if (numString.length < 4) {
+      let zeroString = '';
+      for (let i = 0; i < 4 - numString.length; i += 1) {
+        zeroString += '0';
+      }
+      return zeroString + numString;
+    }
+    return numString;
+  };
 
   return (
     <>
@@ -733,15 +631,12 @@ const IndexPage: React.FC = () => {
             <div className={styles.leftTop}>
               <div
                 className={styles.content}
-                onMouseEnter={() =>
-                  clearRefInterval(runtimeRef.current.leftTabsInterval)
-                }
-                onMouseLeave={() =>
-                  (runtimeRef.current.leftTabsInterval = setInterval(
-                    changeLeftTab,
-                    2000,
-                  ))
-                }
+                onMouseEnter={() => {
+                  if (runtimeRef.current.leftTabsInterval) {
+                    clearRefInterval(runtimeRef.current.leftTabsInterval);
+                  }
+                }}
+                onMouseLeave={startLeftTabsInterval}
               >
                 <div className={styles.contentTitle}>设备状态</div>
                 <div className={styles.tabs}>
@@ -751,25 +646,38 @@ const IndexPage: React.FC = () => {
                     activeKey={leftActiveKey}
                     onChange={(activeKey) => setLeftActiveKey(activeKey)}
                   >
-                    <Tabs.TabPane tab="温湿度" key="1"></Tabs.TabPane>
-                    <Tabs.TabPane tab="消防" key="2"></Tabs.TabPane>
-                    <Tabs.TabPane tab="漏水" key="3"></Tabs.TabPane>
-                    <Tabs.TabPane tab="门禁" key="4"></Tabs.TabPane>
+                    {deviceTypeList.map((type, index) => {
+                      const deviceData = deviceSumList.find(
+                        (d) => d.type === type,
+                      );
+                      return (
+                        <Tabs.TabPane tab={type} key={`${index}`}>
+                          <div className={styles.data}>
+                            <div className={styles.dataBlue}>
+                              <div className={styles.number}>
+                                {deviceData
+                                  ? deviceData.normalNum + deviceData.faultNum
+                                  : ''}
+                              </div>
+                              <div className={styles.text}>接入设备总数</div>
+                            </div>
+                            <div className={styles.dataGreen}>
+                              <div className={styles.number}>
+                                {deviceData ? deviceData.normalNum : ''}
+                              </div>
+                              <div className={styles.text}>设备正常</div>
+                            </div>
+                            <div className={styles.dataRed}>
+                              <div className={styles.number}>
+                                {deviceData ? deviceData.faultNum : ''}
+                              </div>
+                              <div className={styles.text}>设备异常</div>
+                            </div>
+                          </div>
+                        </Tabs.TabPane>
+                      );
+                    })}
                   </Tabs>
-                </div>
-                <div className={styles.data}>
-                  <div className={styles.dataBlue}>
-                    <div className={styles.number}>239</div>
-                    <div className={styles.text}>接入设备总数</div>
-                  </div>
-                  <div className={styles.dataGreen}>
-                    <div className={styles.number}>238</div>
-                    <div className={styles.text}>设备正常</div>
-                  </div>
-                  <div className={styles.dataRed}>
-                    <div className={styles.number}>1</div>
-                    <div className={styles.text}>设备异常</div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -785,8 +693,8 @@ const IndexPage: React.FC = () => {
                       <CaretDownOutlined style={{ color: '#66D7F6' }} />
                     }
                   >
-                    {leftSelectData.map((data) => (
-                      <Select.Option value={data.key} key={data.key}>
+                    {mapData.map((data) => (
+                      <Select.Option value={data.id} key={data.id}>
                         {data.name}
                       </Select.Option>
                     ))}
@@ -882,17 +790,23 @@ const IndexPage: React.FC = () => {
                 <div className={styles.headerItem}>
                   <img src={mapTop1} />
                   <div className={styles.itemTitle}>接入节点数</div>
-                  <div className={styles.itemNumber}>0008</div>
+                  <div className={styles.itemNumber}>
+                    {getNumberString(deviceIndexNum.monitorNum)}
+                  </div>
                 </div>
                 <div className={styles.headerItem}>
                   <img src={mapTop2} />
                   <div className={styles.itemTitle}>接入机房数</div>
-                  <div className={styles.itemNumber}>0012</div>
+                  <div className={styles.itemNumber}>
+                    {getNumberString(deviceIndexNum.roomNum)}
+                  </div>
                 </div>
                 <div className={styles.headerItem}>
                   <img src={mapTop3} />
                   <div className={styles.itemTitle}>接入设备数</div>
-                  <div className={styles.itemNumber}>0958</div>
+                  <div className={styles.itemNumber}>
+                    {getNumberString(deviceIndexNum.deviceNum)}
+                  </div>
                 </div>
               </div>
               <div
@@ -900,7 +814,7 @@ const IndexPage: React.FC = () => {
                 id="regionalMap"
                 onClick={mapClick}
               >
-                <FlylineChart points={points} lines={lines} />
+                <FlylineChart data={mapData} />
               </div>
             </div>
             <div
@@ -982,7 +896,10 @@ const IndexPage: React.FC = () => {
                     }
                     scrollPause={scrollPause}
                   /> */}
-                  <AlarmTable data={bottomData} bottomBoxUp={bottomBoxUp} />
+                  <AlarmTable
+                    data={alarmEventLatest}
+                    bottomBoxUp={bottomBoxUp}
+                  />
                 </div>
               </div>
             </div>
@@ -1022,7 +939,7 @@ const IndexPage: React.FC = () => {
               <div className={styles.content}>
                 <div className={styles.contentTitle}>历史告警统计</div>
                 <div className={styles.historyArea}>
-                  <HistoryDualAxes data={data} />
+                  <HistoryDualAxes data={alarmEventSumList} />
                 </div>
               </div>
             </div>

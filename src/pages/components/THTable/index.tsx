@@ -15,7 +15,7 @@ interface THTableProps {
 
 const THTable: React.FC<THTableProps> = (props) => {
   const { data } = props;
-  console.log('data', data);
+  // console.log('data', data);
 
   const columns = [
     {

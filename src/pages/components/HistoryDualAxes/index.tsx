@@ -1,21 +1,30 @@
 import React from 'react';
 import { DualAxes } from '@ant-design/plots';
 
+interface AxesItemType {
+  alarmMonth: number;
+  alarmNum: number;
+}
 interface HistoryDualAxesProps {
-  data: any[];
+  data: AxesItemType[];
 }
 
 const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
   const { data } = props;
+  const axesData = data.map((d) => ({
+    alarmMonth: `${d.alarmMonth}月`,
+    alarmNum: d.alarmNum,
+    alarmLine: d.alarmNum,
+  }));
 
   return (
     <DualAxes
       // animation={false}
-      data={[data, data]}
-      xField="time"
-      yField={['alarm', 'alarmLine']}
+      data={[axesData, axesData]}
+      xField="alarmMonth"
+      yField={['alarmNum', 'alarmLine']}
       meta={{
-        alarm: {
+        alarmNum: {
           alias: '告警次数',
         },
         alarmLine: {
@@ -51,11 +60,11 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
       yAxis={{
         alarm: {
           min: 0,
-          max: 60,
+          // max: 60,
         },
         alarmLine: {
           min: 0,
-          max: 60,
+          // max: 60,
           label: null,
         },
       }}

@@ -1,7 +1,6 @@
 import { defineConfig } from 'umi';
 
 export default defineConfig({
-  mock: false,
   title: false,
   nodeModulesTransform: {
     type: 'none',

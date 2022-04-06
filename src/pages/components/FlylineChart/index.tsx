@@ -3,14 +3,70 @@ import React from 'react';
 import { FlylineChartEnhanced } from '@jiaminghi/data-view-react';
 import map from '@/assets/nMap.png';
 import mapPoint from '@/assets/mapPoint.png';
+import mapCenterPoint from '@/assets/mapCenterPoint.png';
+
+interface pointType {
+  corePoint: number;
+  id: number;
+  locateX: number;
+  locateY: number;
+  name: string;
+}
 
 interface FlylineChartProps {
-  points: any[];
-  lines: any[];
+  data: pointType[];
+}
+
+interface MapPointType {
+  name: string;
+  coordinate: number[];
+  icon?: any;
+  text?: any;
+}
+
+interface MapLineType {
+  source: string;
+  target: string;
+  color?: string;
+  orbitColor?: string;
 }
 
 const FlylineChart: React.FC<FlylineChartProps> = (props) => {
-  const { points, lines } = props;
+  const { data } = props;
+
+  let corePointId: number | null = null;
+  let corePointName: string | null = null;
+  const points: MapPointType[] = data.map((d: any) => {
+    if (d.corePoint === 1) {
+      corePointId = d.id;
+      corePointName = d.name;
+      return {
+        name: d.name,
+        coordinate: [d.locateX, d.locateY],
+        icon: {
+          src: mapCenterPoint,
+          width: 30,
+          height: 30,
+        },
+      };
+    }
+    return {
+      name: d.name,
+      coordinate: [d.locateX, d.locateY],
+    };
+  });
+  const lines: MapLineType[] = [];
+  if (corePointId !== null && corePointName !== null) {
+    data.forEach((d: any) => {
+      if (d.id !== corePointId && corePointName !== null) {
+        lines.push({
+          source: d.name,
+          target: corePointName,
+        });
+      }
+    });
+  }
+  console.log('c', points, lines);
 
   return (
     <FlylineChartEnhanced
@@ -23,7 +79,7 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
           src: mapPoint,
         },
         text: {
-          show: true,
+          show: false,
         },
         bgImgSrc: map,
         line: {
