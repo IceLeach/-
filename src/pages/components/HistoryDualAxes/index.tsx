@@ -35,6 +35,7 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
         {
           geometry: 'column',
           color: ['#379FFF', '#72ECFF'],
+          // color:(datum: Datum, defaultColor?: string) => '#5689F0',
           columnStyle: {
             radius: [20, 20, 0, 0],
           },
@@ -47,6 +48,7 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
             size: 2.5,
             color: '#E2E8FF',
           },
+          smooth: true,
         },
       ]}
       xAxis={{
@@ -58,7 +60,7 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
         tickCount: data.length,
       }}
       yAxis={{
-        alarm: {
+        alarmNum: {
           min: 0,
           // max: 60,
         },

@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 import { Helmet } from 'umi';
-import { Progress, Select, Tabs } from 'antd';
+import { Select, Tabs } from 'antd';
 import {
   CaretDownOutlined,
   CaretUpOutlined,
@@ -16,10 +16,13 @@ import G6, { Graph } from '@antv/g6';
 import {
   AlarmEventGetLatest,
   AlarmEventGetSumList,
+  DeviceGetAlarmOfPoint,
   DeviceGetIndexNum,
   DeviceGetPowerOfDevice,
   DeviceGetSumList,
   DeviceGetTypeList,
+  DeviceThi,
+  MapGetPowerSumList,
   MapPointList,
 } from '@/services/api';
 // import ScrollTable, { scrollRef } from './components/ScrollTable';
@@ -29,21 +32,20 @@ import FlylineChart from './components/FlylineChart';
 import DateTime from './components/DateTime';
 import AlarmTable from './components/AlarmTable';
 import THTable, { THTableRow } from './components/THTable';
+import KWHArea from './components/KWHArea';
+import MapHeader, { DeviceIndexNumType } from './components/MapHeader';
+import CircleProgress from './components/CircleProgress';
 // @ts-ignore
 import logo from '@/assets/logo.ico';
-import mapCenterPoint from '@/assets/mapCenterPoint.png';
-import mapTop1 from '@/assets/mapTop1.png';
-import mapTop2 from '@/assets/mapTop2.png';
-import mapTop3 from '@/assets/mapTop3.png';
-import errorPoint from '@/assets/errorPoint.png';
 import styles from './index.less';
-import KWHArea from './components/KWHArea';
 import a from '@/assets/a.png';
 
 interface RuntimeRefType {
   leftTabsInterval: NodeJS.Timer | null;
+  leftSelectInterval: NodeJS.Timer | null;
   // scrollTableInterval: NodeJS.Timer | null;
   rightTabsInterval: NodeJS.Timer | null;
+  mapAlarmPointInterval: NodeJS.Timer | null;
 }
 interface RightTopDataType {
   groupKey: string;
@@ -57,21 +59,21 @@ interface DeviceSumListType {
   type: string;
 }
 
-interface DeviceIndexNumType {
-  deviceNum: number;
-  monitorNum: number;
-  roomNum: number;
-}
-
 interface AlarmEventSumListType {
   alarmMonth: number;
   alarmNum: number;
 }
 
-interface ProgressDataType {
+interface ProgressDataItemType {
   normalNum: number;
   faultNum: number;
-  type: string;
+  sum: number;
+}
+
+interface ProgressDataType {
+  commercial?: ProgressDataItemType;
+  ups?: ProgressDataItemType;
+  airConditioner?: ProgressDataItemType;
 }
 
 const leftAreaData = [
@@ -127,120 +129,6 @@ const n = [
   { id: '4', x: 170.2285476653881, y: 366.2158066640094, error: false },
 ];
 
-const points = [
-  {
-    name: '宁波港大厦中心机房',
-    coordinate: [500.40000915527344, 275.4214321683765],
-    icon: {
-      src: mapCenterPoint,
-      width: 30,
-      height: 30,
-    },
-    text: {
-      color: '#fb7293',
-    },
-  },
-  {
-    name: '宁波联通讯中心机房',
-    coordinate: [198, 280.7001912282417],
-  },
-  {
-    name: '宁波环球航运中心机房',
-    coordinate: [198, 307.71946317684984],
-  },
-  {
-    name: '梅东通过机房',
-    coordinate: [666, 406.79012698841296],
-  },
-  {
-    name: '北二集司通信机房',
-    coordinate: [601, 309.2205338406614],
-    text: {
-      offset: [0, 25],
-    },
-  },
-  {
-    name: '北三集司（远东)通信机房',
-    coordinate: [624, 312.2226751682845],
-    text: {
-      offset: [80, 0],
-    },
-  },
-  {
-    name: '北三集司（港吉）通信机房',
-    coordinate: [571, 304.7173218492267],
-    text: {
-      offset: [-50, 15],
-    },
-  },
-  {
-    name: '大榭招商通信机房',
-    coordinate: [613, 255.18201284796575],
-    icon: {
-      src: errorPoint,
-    },
-  },
-  {
-    name: '桃花岛引航通信基地机房',
-    coordinate: [826, 375],
-  },
-];
-const lines = [
-  {
-    source: '宁波联通讯中心机房',
-    target: '宁波港大厦中心机房',
-  },
-  {
-    source: '宁波环球航运中心机房',
-    target: '宁波港大厦中心机房',
-  },
-  {
-    source: '梅东通过机房',
-    target: '宁波港大厦中心机房',
-  },
-  {
-    source: '北二集司通信机房',
-    target: '宁波港大厦中心机房',
-  },
-  {
-    source: '北三集司（远东)通信机房',
-    target: '宁波港大厦中心机房',
-  },
-  {
-    source: '北三集司（港吉）通信机房',
-    target: '宁波港大厦中心机房',
-  },
-  {
-    source: '大榭招商通信机房',
-    target: '宁波港大厦中心机房',
-    color: '#fb7293',
-    orbitColor: '#fb7293',
-    width: 2,
-  },
-  {
-    source: '桃花岛引航通信基地机房',
-    target: '宁波港大厦中心机房',
-  },
-];
-
-const rightTabsData = [
-  { id: '1', name: '机房1', temperature: 30, humidity: 20 },
-  { id: '2', name: '机房2', temperature: 30, humidity: 20 },
-  { id: '3', name: '机房3', temperature: 30, humidity: 20 },
-  { id: '4', name: '机房4', temperature: 30, humidity: 20 },
-  { id: '5', name: '机房5', temperature: 30, humidity: 20 },
-  { id: '6', name: '机房6', temperature: 30, humidity: 20 },
-  { id: '7', name: '机房7', temperature: 30, humidity: 20 },
-  { id: '8', name: '机房8', temperature: 30, humidity: 20 },
-  { id: '9', name: '机房9', temperature: 30, humidity: 20 },
-  { id: '10', name: '机房10', temperature: 30, humidity: 20 },
-  { id: '11', name: '机房11', temperature: 30, humidity: 20 },
-  { id: '12', name: '机房12', temperature: 30, humidity: 20 },
-  { id: '13', name: '机房13', temperature: 30, humidity: 20 },
-  { id: '14', name: '机房14', temperature: 30, humidity: 20 },
-  { id: '15', name: '机房15', temperature: 30, humidity: 20 },
-];
-
 const IndexPage: React.FC = () => {
   const [leftActiveKey, setLeftActiveKey] = useState<string>('0');
   const [rightActiveKey, setRightActiveKey] = useState<string>('0');
@@ -250,7 +138,6 @@ const IndexPage: React.FC = () => {
   const [isInnerMap, setIsInnerMap] = useState<boolean>(false);
   const [innerGraph, setInnerGraph] = useState<Graph | null>(null);
   const [weatherData, setWeatherData] = useState<any>({});
-  const [rightTopData, setRightTopData] = useState<RightTopDataType[]>([]);
   const [mapData, setMapData] = useState<any[]>([]);
   const [deviceTypeList, setDeviceTypeList] = useState<string[]>([]);
   const [deviceSumList, setDeviceSumList] = useState<DeviceSumListType[]>([]);
@@ -263,11 +150,17 @@ const IndexPage: React.FC = () => {
   const [alarmEventSumList, setAlarmEventSumList] = useState<
     AlarmEventSumListType[]
   >([]);
-  const [progressData, setProgressData] = useState<ProgressDataType[]>([]);
+  const [progressData, setProgressData] = useState<ProgressDataType>({});
+  const [deviceAlarmPointData, setDeviceAlarmPointData] = useState<number[]>(
+    [],
+  );
+  const [deviceThiData, setDeviceThiData] = useState<any[]>([]);
   const runtimeRef = useRef<RuntimeRefType>({
     leftTabsInterval: null,
+    leftSelectInterval: null,
     // scrollTableInterval: null,
     rightTabsInterval: null,
+    mapAlarmPointInterval: null,
   });
 
   // const ws = useRef<WebSocket | null>(null);
@@ -298,6 +191,12 @@ const IndexPage: React.FC = () => {
   //   ws.current?.close();
   // }, [ws]);
 
+  const clearRefInterval = (interval: NodeJS.Timer | null) => {
+    if (interval) {
+      clearInterval(interval);
+    }
+  };
+
   useEffect(() => {
     console.log('w', window.screen.width);
     // @ts-ignore
@@ -308,14 +207,14 @@ const IndexPage: React.FC = () => {
 
   useEffect(() => {
     MapPointList().then((res) => {
-      if (res?.data?.length) {
+      if (res?.data) {
         setMapData(res.data);
         const selectedPoint = res.data.find((d: any) => d.selected === 1);
         setLeftSelectKey(selectedPoint ? selectedPoint.id : res.data[0].id);
       }
     });
     DeviceGetTypeList().then((res) => {
-      if (res?.data?.length) {
+      if (res?.data) {
         setDeviceTypeList(res.data);
       }
     });
@@ -334,7 +233,7 @@ const IndexPage: React.FC = () => {
   useEffect(() => {
     const getDeviceSumListData = () => {
       DeviceGetSumList().then((res) => {
-        if (res?.data?.length) {
+        if (res?.data) {
           setDeviceSumList(res.data);
         }
       });
@@ -346,27 +245,107 @@ const IndexPage: React.FC = () => {
         }
       });
     };
+    const getDeviceThi = () => {
+      DeviceThi().then((res) => {
+        if (res?.data) {
+          const rtData: RightTopDataType[] = [];
+          for (let i = 0; i < Math.ceil(res.data.length / 5); i += 1) {
+            rtData.push({
+              groupKey: `${i}`,
+              groupName: `第${i + 1}页`,
+              groupData: res.data.slice(i * 5, (i + 1) * 5),
+            });
+          }
+          // setRightTopData(rtData);
+          setDeviceThiData(rtData);
+        }
+      });
+    };
     getDeviceSumListData();
     getAlarmEventLatest();
+    getDeviceThi();
     const deviceSumList = setInterval(getDeviceSumListData, 10000);
     const alarmEvent = setInterval(getAlarmEventLatest, 10000);
+    const deviceThi = setInterval(getDeviceThi, 10000);
 
     return () => {
       clearInterval(deviceSumList);
       clearInterval(alarmEvent);
+      clearInterval(deviceThi);
     };
   }, []);
 
   useEffect(() => {
     if (leftSelectKey !== null) {
-      DeviceGetPowerOfDevice({ id: leftSelectKey }).then((res) => {
+      const getAction = () => {
+        DeviceGetPowerOfDevice({ id: leftSelectKey }).then((res) => {
+          if (res?.data) {
+            const commercial = res.data.find((d: any) => d.type === '市电');
+            const ups = res.data.find((d: any) => d.type === 'UPS电');
+            const airConditioner = res.data.find((d: any) => d.type === '空调');
+            const data = {
+              commercial: commercial
+                ? {
+                    normalNum: commercial.normalNum,
+                    faultNum: commercial.faultNum,
+                    sum: commercial.normalNum + commercial.faultNum,
+                  }
+                : undefined,
+              ups: ups
+                ? {
+                    normalNum: ups.normalNum,
+                    faultNum: ups.faultNum,
+                    sum: ups.normalNum + ups.faultNum,
+                  }
+                : undefined,
+              airConditioner: airConditioner
+                ? {
+                    normalNum: airConditioner.normalNum,
+                    faultNum: airConditioner.faultNum,
+                    sum: airConditioner.normalNum + airConditioner.faultNum,
+                  }
+                : undefined,
+            };
+            setProgressData(data);
+          }
+        });
+      };
+      getAction();
+      clearRefInterval(runtimeRef.current.leftSelectInterval);
+      runtimeRef.current.leftSelectInterval = setInterval(getAction, 10000);
+      MapGetPowerSumList({ id: leftSelectKey }).then((res) => {
         console.log('res', res);
-        if (res?.data) {
-          setProgressData(res.data);
-        }
       });
     }
+
+    return () => {
+      clearRefInterval(runtimeRef.current.leftSelectInterval);
+    };
   }, [leftSelectKey]);
+
+  useEffect(() => {
+    const getMapAlarmPoint = () => {
+      DeviceGetAlarmOfPoint().then((res) => {
+        if (res?.data) {
+          setDeviceAlarmPointData(res.data);
+        }
+      });
+    };
+    if (isInnerMap) {
+      clearRefInterval(runtimeRef.current.mapAlarmPointInterval);
+    } else {
+      clearRefInterval(runtimeRef.current.mapAlarmPointInterval);
+      getMapAlarmPoint();
+      runtimeRef.current.mapAlarmPointInterval = setInterval(
+        getMapAlarmPoint,
+        10000,
+      );
+    }
+
+    return () => {
+      clearRefInterval(runtimeRef.current.mapAlarmPointInterval);
+    };
+  }, [isInnerMap]);
 
   const getWeather = () => {
     const cityCode = '101210401';
@@ -392,9 +371,7 @@ const IndexPage: React.FC = () => {
     });
   };
   const startLeftTabsInterval = () => {
-    if (runtimeRef.current.leftTabsInterval) {
-      clearRefInterval(runtimeRef.current.leftTabsInterval);
-    }
+    clearRefInterval(runtimeRef.current.leftTabsInterval);
     if (deviceTypeList.length > 0) {
       runtimeRef.current.leftTabsInterval = setInterval(changeLeftTab, 8000);
     }
@@ -403,34 +380,30 @@ const IndexPage: React.FC = () => {
   const changeRightTab = () => {
     setRightActiveKey((activeKey) => {
       const key: number = parseInt(activeKey);
-      if (key + 1 < rightTopData.length) {
+      if (key + 1 < deviceThiData.length) {
         return `${key + 1}`;
       } else {
         return '0';
       }
     });
   };
+  const startRightTabsInterval = () => {
+    clearRefInterval(runtimeRef.current.rightTabsInterval);
+    if (deviceTypeList.length > 0) {
+      runtimeRef.current.rightTabsInterval = setInterval(changeRightTab, 8000);
+    }
+  };
   // const tableScroll = () => {
   //   scrollRef && scrollRef.slickNext();
   // };
-  const clearRefInterval = (interval: NodeJS.Timer | null) => {
-    if (interval) {
-      clearInterval(interval);
-    }
-  };
 
   useEffect(() => {
     startLeftTabsInterval();
   }, [deviceTypeList]);
 
   useEffect(() => {
-    if (runtimeRef.current.rightTabsInterval) {
-      clearRefInterval(runtimeRef.current.rightTabsInterval);
-    }
-    if (rightTopData.length > 0) {
-      runtimeRef.current.rightTabsInterval = setInterval(changeRightTab, 2000);
-    }
-  }, [rightTopData]);
+    startRightTabsInterval();
+  }, [deviceThiData]);
 
   // const getScrollLimit = (maxCount: number) => {
   //   if (bottomData.length >= maxCount) {
@@ -582,30 +555,6 @@ const IndexPage: React.FC = () => {
     // runtimeRef.current.scrollTableInterval = setInterval(tableScroll, 2000);
   }, []);
 
-  useEffect(() => {
-    const rtData: RightTopDataType[] = [];
-    for (let i = 0; i < Math.ceil(rightTabsData.length / 5); i += 1) {
-      rtData.push({
-        groupKey: `${i}`,
-        groupName: `${i * 5 + 1}-${(i + 1) * 5}号机房`,
-        groupData: rightTabsData.slice(i * 5, (i + 1) * 5),
-      });
-    }
-    setRightTopData(rtData);
-  }, []);
-
-  const getNumberString = (num: number) => {
-    const numString = `${num}`;
-    if (numString.length < 4) {
-      let zeroString = '';
-      for (let i = 0; i < 4 - numString.length; i += 1) {
-        zeroString += '0';
-      }
-      return zeroString + numString;
-    }
-    return numString;
-  };
-
   return (
     <>
       <Helmet>
@@ -631,11 +580,9 @@ const IndexPage: React.FC = () => {
             <div className={styles.leftTop}>
               <div
                 className={styles.content}
-                onMouseEnter={() => {
-                  if (runtimeRef.current.leftTabsInterval) {
-                    clearRefInterval(runtimeRef.current.leftTabsInterval);
-                  }
-                }}
+                onMouseEnter={() =>
+                  clearRefInterval(runtimeRef.current.leftTabsInterval)
+                }
                 onMouseLeave={startLeftTabsInterval}
               >
                 <div className={styles.contentTitle}>设备状态</div>
@@ -702,77 +649,96 @@ const IndexPage: React.FC = () => {
                 </div>
                 <div className={styles.progressArea}>
                   <div>
-                    <Progress
-                      className={styles.progress}
-                      type="circle"
-                      trailColor="#3A4A6D"
-                      percent={99}
-                      format={(percent) => (
-                        <div className={styles.progressText}>
-                          <div
-                            className={styles.percent}
-                            style={{ color: '#72ECFF' }}
-                          >
-                            {percent}%
-                          </div>
-                          <div className={styles.itemName}>市电</div>
-                        </div>
-                      )}
+                    <CircleProgress
+                      percent={
+                        progressData.commercial &&
+                        progressData.commercial.sum !== 0
+                          ? Math.floor(
+                              (progressData.commercial.normalNum /
+                                progressData.commercial.sum) *
+                                100,
+                            )
+                          : 100
+                      }
+                      percentColor="#72ECFF"
+                      text="市电"
                       strokeColor={{
                         '0%': '#72ECFF',
                         // '50%': '#339AFF',
                         '100%': '#339AFF',
                       }}
                     />
-                    <StateCard successNum={16} errorNum={0} />
+                    <StateCard
+                      successNum={
+                        progressData.commercial
+                          ? progressData.commercial.normalNum
+                          : 0
+                      }
+                      errorNum={
+                        progressData.commercial
+                          ? progressData.commercial.faultNum
+                          : 0
+                      }
+                    />
                   </div>
                   <div>
-                    <Progress
-                      className={styles.progress}
-                      type="circle"
-                      trailColor="#3A4A6D"
-                      percent={99}
-                      format={(percent) => (
-                        <div className={styles.progressText}>
-                          <div
-                            className={styles.percent}
-                            style={{ color: '#B7A0FF' }}
-                          >
-                            {percent}%
-                          </div>
-                          <div className={styles.itemName}>UPS</div>
-                        </div>
-                      )}
+                    <CircleProgress
+                      percent={
+                        progressData.ups && progressData.ups.sum !== 0
+                          ? Math.floor(
+                              (progressData.ups.normalNum /
+                                progressData.ups.sum) *
+                                100,
+                            )
+                          : 100
+                      }
+                      percentColor="#B7A0FF"
+                      text="UPS"
                       strokeColor={{
                         '0%': '#9372FF',
                         '100%': '#6C8BE8',
                       }}
                     />
-                    <StateCard successNum={16} errorNum={0} />
+                    <StateCard
+                      successNum={
+                        progressData.ups ? progressData.ups.normalNum : 0
+                      }
+                      errorNum={
+                        progressData.ups ? progressData.ups.faultNum : 0
+                      }
+                    />
                   </div>
                   <div>
-                    <Progress
-                      className={styles.progress}
-                      type="circle"
-                      trailColor="#3A4A6D"
-                      percent={99}
-                      format={(percent) => (
-                        <div className={styles.progressText}>
-                          <div
-                            className={styles.percent}
-                            style={{ color: '#71A4FF' }}
-                          >
-                            {percent}%
-                          </div>
-                          <div className={styles.itemName}>空调</div>
-                        </div>
-                      )}
+                    <CircleProgress
+                      percent={
+                        progressData.airConditioner &&
+                        progressData.airConditioner.sum !== 0
+                          ? Math.floor(
+                              (progressData.airConditioner.normalNum /
+                                progressData.airConditioner.sum) *
+                                100,
+                            )
+                          : 100
+                      }
+                      percentColor="#71A4FF"
+                      text="空调"
                       strokeColor={{
                         '0%': '#4A93FF',
                         '100%': '#6AA0FF',
                       }}
                     />
-                    <StateCard successNum={16} errorNum={0} />
+                    <StateCard
+                      successNum={
+                        progressData.airConditioner
+                          ? progressData.airConditioner.normalNum
+                          : 0
+                      }
+                      errorNum={
+                        progressData.airConditioner
+                          ? progressData.airConditioner.faultNum
+                          : 0
+                      }
+                    />
                   </div>
                 </div>
                 <div className={styles.mapArea}>
@@ -786,35 +752,16 @@ const IndexPage: React.FC = () => {
               className={styles.outerMap}
               style={{ display: isInnerMap ? 'none' : 'flex' }}
             >
-              <div className={styles.mapHeader}>
-                <div className={styles.headerItem}>
-                  <img src={mapTop1} />
-                  <div className={styles.itemTitle}>接入节点数</div>
-                  <div className={styles.itemNumber}>
-                    {getNumberString(deviceIndexNum.monitorNum)}
-                  </div>
-                </div>
-                <div className={styles.headerItem}>
-                  <img src={mapTop2} />
-                  <div className={styles.itemTitle}>接入机房数</div>
-                  <div className={styles.itemNumber}>
-                    {getNumberString(deviceIndexNum.roomNum)}
-                  </div>
-                </div>
-                <div className={styles.headerItem}>
-                  <img src={mapTop3} />
-                  <div className={styles.itemTitle}>接入设备数</div>
-                  <div className={styles.itemNumber}>
-                    {getNumberString(deviceIndexNum.deviceNum)}
-                  </div>
-                </div>
-              </div>
+              <MapHeader data={deviceIndexNum} />
               <div
                 className={styles.regionalMap}
                 id="regionalMap"
                 onClick={mapClick}
               >
-                <FlylineChart data={mapData} />
+                <FlylineChart
+                  data={mapData}
+                  errorPoints={deviceAlarmPointData}
+                />
               </div>
             </div>
             <div
@@ -911,12 +858,7 @@ const IndexPage: React.FC = () => {
                 onMouseEnter={() =>
                   clearRefInterval(runtimeRef.current.rightTabsInterval)
                 }
-                onMouseLeave={() =>
-                  (runtimeRef.current.rightTabsInterval = setInterval(
-                    changeRightTab,
-                    2000,
-                  ))
-                }
+                onMouseLeave={startRightTabsInterval}
               >
                 <div className={styles.contentTitle}>温湿度</div>
                 <div className={styles.tabs}>
@@ -926,7 +868,7 @@ const IndexPage: React.FC = () => {
                     activeKey={rightActiveKey}
                     onChange={(activeKey) => setRightActiveKey(activeKey)}
                   >
-                    {rightTopData.map((data) => (
+                    {deviceThiData.map((data) => (
                       <Tabs.TabPane tab={data.groupName} key={data.groupKey}>
                         <THTable data={data.groupData} />
                       </Tabs.TabPane>

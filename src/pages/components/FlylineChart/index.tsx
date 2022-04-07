@@ -4,6 +4,8 @@ import { FlylineChartEnhanced } from '@jiaminghi/data-view-react';
 import map from '@/assets/nMap.png';
 import mapPoint from '@/assets/mapPoint.png';
 import mapCenterPoint from '@/assets/mapCenterPoint.png';
+import mapErrorPoint from '@/assets/mapErrorPoint.png';
+import mapCenterErrorPoint from '@/assets/mapCenterErrorPoint.png';
 
 interface pointType {
   corePoint: number;
@@ -15,6 +17,7 @@ interface pointType {
 
 interface FlylineChartProps {
   data: pointType[];
+  errorPoints: number[];
 }
 
 interface MapPointType {
@@ -32,19 +35,24 @@ interface MapLineType {
 }
 
 const FlylineChart: React.FC<FlylineChartProps> = (props) => {
-  const { data } = props;
+  const { data, errorPoints } = props;
+  // console.log('data', data)
 
   let corePointId: number | null = null;
   let corePointName: string | null = null;
-  const points: MapPointType[] = data.map((d: any) => {
+  let corePointError: boolean = false;
+  const points: MapPointType[] = data.map((d) => {
     if (d.corePoint === 1) {
       corePointId = d.id;
       corePointName = d.name;
+      if (errorPoints.find((point) => point === d.id)) {
+        corePointError = true;
+      }
       return {
         name: d.name,
         coordinate: [d.locateX, d.locateY],
         icon: {
-          src: mapCenterPoint,
+          src: corePointError ? mapCenterErrorPoint : mapCenterPoint,
           width: 30,
           height: 30,
         },
@@ -53,6 +61,11 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
     return {
       name: d.name,
       coordinate: [d.locateX, d.locateY],
+      icon: {
+        src: errorPoints.find((point) => point === d.id)
+          ? mapErrorPoint
+          : mapPoint,
+      },
     };
   });
   const lines: MapLineType[] = [];
@@ -62,11 +75,17 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
         lines.push({
           source: d.name,
           target: corePointName,
+          color: errorPoints.find((point) => point === d.id)
+            ? 'transparent'
+            : '#B5D3FB',
+          orbitColor: errorPoints.find((point) => point === d.id)
+            ? '#FC9249'
+            : 'rgba(103,224,227,0.7)',
         });
       }
     });
   }
-  console.log('c', points, lines);
+  // console.log('c', points, lines);
 
   return (
     <FlylineChartEnhanced
@@ -77,15 +96,17 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
         icon: {
           show: true,
           src: mapPoint,
+          width: 30,
+          height: 30,
         },
         text: {
           show: false,
         },
         bgImgSrc: map,
         line: {
-          duration: [20, 20],
+          duration: [50, 50],
           width: 2,
-          color: '#0BD08D',
+          color: corePointError ? 'transparent' : '#B5D3FB',
         },
       }}
       style={{ width: '100%', height: '100%' }}

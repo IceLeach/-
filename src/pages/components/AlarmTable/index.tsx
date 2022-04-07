@@ -62,7 +62,7 @@ const AlarmTable: React.FC<AlarmTableProps> = (props) => {
         ),
       }}
       rowKey="id"
-      scroll={{ y: bottomBoxUp ? 470 : 1000 }}
+      scroll={{ y: bottomBoxUp ? 470 : 100000 }}
       className={styles.dataTable}
     />
   );

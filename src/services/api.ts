@@ -48,3 +48,21 @@ export async function DeviceGetPowerOfDevice(params: { id: number }) {
     method: 'get',
   });
 }
+
+export async function DeviceGetAlarmOfPoint() {
+  return request('/screen/api/map/getAlarmOfPoint', {
+    method: 'get',
+  });
+}
+
+export async function DeviceThi() {
+  return request('/screen/api/device/thi', {
+    method: 'get',
+  });
+}
+
+export async function MapGetPowerSumList(params: { id: number }) {
+  return request(`/screen/api/map/getPowerSumList/${params.id}`, {
+    method: 'get',
+  });
+}

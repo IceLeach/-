@@ -3,8 +3,8 @@ import { Table } from 'antd';
 import styles from './index.less';
 
 export interface THTableRow {
-  id: string;
-  name: string;
+  roomId: string;
+  roomName: string;
   temperature: number;
   humidity: number;
 }
@@ -15,12 +15,14 @@ interface THTableProps {
 
 const THTable: React.FC<THTableProps> = (props) => {
   const { data } = props;
-  // console.log('data', data);
 
   const columns = [
     {
       title: '名称',
-      dataIndex: 'name',
+      dataIndex: 'roomName',
+      ellipsis: {
+        showTitle: true,
+      },
     },
     {
       title: '温度(℃)',
@@ -37,7 +39,7 @@ const THTable: React.FC<THTableProps> = (props) => {
       columns={columns}
       dataSource={data}
       pagination={false}
-      rowKey="id"
+      rowKey="roomId"
       scroll={{ y: 250 }}
       className={styles.dataTable}
     />
