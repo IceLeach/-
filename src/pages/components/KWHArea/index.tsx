@@ -7,21 +7,27 @@ interface KWHAreaProps {
 
 const KWHArea: React.FC<KWHAreaProps> = (props) => {
   const { data } = props;
+  const areaData = data.map((d) => ({
+    type: d.type,
+    powerMonth: `${d.powerMonth}月`,
+    powerNum: d.powerNum,
+  }));
 
   return (
     <Area
-      data={data}
+      data={areaData}
       // isStack={false}
-      xField="month"
-      yField="percent"
+      xField="powerMonth"
+      yField="powerNum"
       seriesField="type"
+      smooth={true}
       xAxis={{
         label: {
           offsetX: 10,
           rotate: 45,
-          formatter: (text: string) => {
-            return `${text}月`;
-          },
+          // formatter: (text: string) => {
+          //   return `${text}月`;
+          // },
         },
       }}
     />

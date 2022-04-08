@@ -16,9 +16,11 @@ import G6, { Graph } from '@antv/g6';
 import {
   AlarmEventGetLatest,
   AlarmEventGetSumList,
+  DeviceGetAlarmOfDevice,
   DeviceGetAlarmOfPoint,
   DeviceGetIndexNum,
   DeviceGetPowerOfDevice,
+  DeviceGetRoomOfDeviceList,
   DeviceGetSumList,
   DeviceGetTypeList,
   DeviceThi,
@@ -38,14 +40,17 @@ import CircleProgress from './components/CircleProgress';
 // @ts-ignore
 import logo from '@/assets/logo.ico';
 import styles from './index.less';
-import a from '@/assets/a.png';
+import { apiUrl } from '@/utils/request';
+import { cloneDeep } from 'lodash';
 
 interface RuntimeRefType {
+  zoom: number;
   leftTabsInterval: NodeJS.Timer | null;
   leftSelectInterval: NodeJS.Timer | null;
   // scrollTableInterval: NodeJS.Timer | null;
   rightTabsInterval: NodeJS.Timer | null;
   mapAlarmPointInterval: NodeJS.Timer | null;
+  roomAlarmPointInterval: NodeJS.Timer | null;
 }
 interface RightTopDataType {
   groupKey: string;
@@ -76,58 +81,29 @@ interface ProgressDataType {
   airConditioner?: ProgressDataItemType;
 }
 
-const leftAreaData = [
-  { type: '市电', month: '5', percent: 20 },
-  { type: '市电', month: '6', percent: 30 },
-  { type: '市电', month: '7', percent: 50 },
-  { type: '市电', month: '8', percent: 40 },
-  { type: '市电', month: '9', percent: 60 },
-  { type: '市电', month: '10', percent: 70 },
-  { type: '市电', month: '11', percent: 20 },
-  { type: '市电', month: '12', percent: 30 },
-  { type: '市电', month: '1', percent: 50 },
-  { type: '市电', month: '2', percent: 40 },
-  { type: '市电', month: '3', percent: 60 },
-  { type: '市电', month: '4', percent: 70 },
-  { type: 'UPS', month: '5', percent: 50 },
-  { type: 'UPS', month: '6', percent: 30 },
-  { type: 'UPS', month: '7', percent: 30 },
-  { type: 'UPS', month: '8', percent: 20 },
-  { type: 'UPS', month: '9', percent: 10 },
-  { type: 'UPS', month: '10', percent: 30 },
-  { type: 'UPS', month: '11', percent: 50 },
-  { type: 'UPS', month: '12', percent: 30 },
-  { type: 'UPS', month: '1', percent: 30 },
-  { type: 'UPS', month: '2', percent: 20 },
-  { type: 'UPS', month: '3', percent: 10 },
-  { type: 'UPS', month: '4', percent: 30 },
-  { type: '空调', month: '5', percent: 30 },
-  { type: '空调', month: '6', percent: 20 },
-  { type: '空调', month: '7', percent: 40 },
-  { type: '空调', month: '8', percent: 70 },
-  { type: '空调', month: '9', percent: 60 },
-  { type: '空调', month: '10', percent: 20 },
-  { type: '空调', month: '11', percent: 30 },
-  { type: '空调', month: '12', percent: 20 },
-  { type: '空调', month: '1', percent: 40 },
-  { type: '空调', month: '2', percent: 70 },
-  { type: '空调', month: '3', percent: 60 },
-  { type: '空调', month: '4', percent: 20 },
-];
+interface DeviceThiDataType {
+  groupKey: string;
+  groupName: string;
+  groupData: any[];
+}
 
-const n = [
-  {
-    id: '0',
-    x: 237.12947577405964,
-    y: 240.95782980909365,
-    error: true,
-    style: { fill: 'red' },
-  },
-  { id: '1', x: 278.3592007497872, y: 336.54688051795773, error: false },
-  { id: '2', x: 278.3592007497872, y: 336.54688051795773, error: false },
-  { id: '3', x: 256.1948574264118, y: 111.97476803836841, error: false },
-  { id: '4', x: 170.2285476653881, y: 366.2158066640094, error: false },
-];
+interface MapPercentDataType {
+  id: number;
+  x: number;
+  y: number;
+  accessX: number[];
+  accessY: number[];
+}
+
+interface InnerMapDataType {
+  inner: boolean;
+  data: {
+    pointId: number;
+    roomId: number;
+    roomName: string;
+    roomPicPath: string;
+  } | null;
+}
 
 const IndexPage: React.FC = () => {
   const [leftActiveKey, setLeftActiveKey] = useState<string>('0');
@@ -135,10 +111,16 @@ const IndexPage: React.FC = () => {
   const [leftSelectKey, setLeftSelectKey] = useState<number | null>(null);
   const [bottomBoxUp, setBottomBoxUp] = useState<boolean>(false);
   // const [scrollPause, setScrollPause] = useState<boolean>(false);
-  const [isInnerMap, setIsInnerMap] = useState<boolean>(false);
+  const [isInnerMap, setIsInnerMap] = useState<InnerMapDataType>({
+    inner: false,
+    data: null,
+  });
   const [innerGraph, setInnerGraph] = useState<Graph | null>(null);
   const [weatherData, setWeatherData] = useState<any>({});
   const [mapData, setMapData] = useState<any[]>([]);
+  const [mapPercentData, setMapPercentData] = useState<MapPercentDataType[]>(
+    [],
+  );
   const [deviceTypeList, setDeviceTypeList] = useState<string[]>([]);
   const [deviceSumList, setDeviceSumList] = useState<DeviceSumListType[]>([]);
   const [deviceIndexNum, setDeviceIndexNum] = useState<DeviceIndexNumType>({
@@ -154,13 +136,17 @@ const IndexPage: React.FC = () => {
   const [deviceAlarmPointData, setDeviceAlarmPointData] = useState<number[]>(
     [],
   );
-  const [deviceThiData, setDeviceThiData] = useState<any[]>([]);
+  const [deviceThiData, setDeviceThiData] = useState<DeviceThiDataType[]>([]);
+  const [mapPowerSumList, setMapPowerSumList] = useState<any[]>([]);
+  const [showNamePoint, setShowNamePoint] = useState<number | null>(null);
   const runtimeRef = useRef<RuntimeRefType>({
+    zoom: 1,
     leftTabsInterval: null,
     leftSelectInterval: null,
     // scrollTableInterval: null,
     rightTabsInterval: null,
     mapAlarmPointInterval: null,
+    roomAlarmPointInterval: null,
   });
 
   // const ws = useRef<WebSocket | null>(null);
@@ -199,16 +185,31 @@ const IndexPage: React.FC = () => {
 
   useEffect(() => {
     console.log('w', window.screen.width);
+    const zoom = document.body.clientWidth / 1920;
+    runtimeRef.current.zoom = zoom;
     // @ts-ignore
-    document.getElementById('main')!.style.zoom = `${
-      document.body.clientWidth / 1920
-    }`;
+    document.getElementById('main')!.style.zoom = `${zoom}`;
   }, [document.body.clientWidth]);
 
   useEffect(() => {
     MapPointList().then((res) => {
       if (res?.data) {
+        console.log('res', res);
         setMapData(res.data);
+        const points = res.data.map((d: any) => ({
+          id: d.id,
+          x: d.locateX / 900,
+          y: d.locateY / 700,
+          accessX:
+            d.corePoint === 1
+              ? [d.locateX / 900 - 0.008, d.locateX / 900 + 0.008]
+              : [d.locateX / 900 - 0.006, d.locateX / 900 + 0.006],
+          accessY:
+            d.corePoint === 1
+              ? [d.locateY / 700 - 0.009, d.locateY / 700 + 0.009]
+              : [d.locateY / 700 - 0.007, d.locateY / 700 + 0.007],
+        }));
+        setMapPercentData(points);
         const selectedPoint = res.data.find((d: any) => d.selected === 1);
         setLeftSelectKey(selectedPoint ? selectedPoint.id : res.data[0].id);
       }
@@ -314,7 +315,9 @@ const IndexPage: React.FC = () => {
       clearRefInterval(runtimeRef.current.leftSelectInterval);
       runtimeRef.current.leftSelectInterval = setInterval(getAction, 10000);
       MapGetPowerSumList({ id: leftSelectKey }).then((res) => {
-        console.log('res', res);
+        if (res?.data) {
+          setMapPowerSumList(res.data);
+        }
       });
     }
 
@@ -331,9 +334,10 @@ const IndexPage: React.FC = () => {
         }
       });
     };
-    if (isInnerMap) {
+    if (isInnerMap.inner) {
       clearRefInterval(runtimeRef.current.mapAlarmPointInterval);
     } else {
+      clearRefInterval(runtimeRef.current.roomAlarmPointInterval);
       clearRefInterval(runtimeRef.current.mapAlarmPointInterval);
       getMapAlarmPoint();
       runtimeRef.current.mapAlarmPointInterval = setInterval(
@@ -345,7 +349,7 @@ const IndexPage: React.FC = () => {
     return () => {
       clearRefInterval(runtimeRef.current.mapAlarmPointInterval);
     };
-  }, [isInnerMap]);
+  }, [isInnerMap.inner]);
 
   const getWeather = () => {
     const cityCode = '101210401';
@@ -413,13 +417,13 @@ const IndexPage: React.FC = () => {
   //   }
   // };
 
-  const DrawInnerMap = () => {
+  const DrawInnerMap = (roomId: number, roomPicPath: string) => {
     G6.registerNode(
       'breath-node',
       {
         afterDraw(cfg: any, group: any) {
           if (cfg.error) {
-            console.log('cfg', cfg, group);
+            // console.log('cfg', cfg, group);
             const r = cfg.size / 2;
             const back1 = group.addShape('circle', {
               zIndex: -3,
@@ -457,57 +461,102 @@ const IndexPage: React.FC = () => {
       container: 'container',
       width: 900,
       height: 700,
-      modes: {
-        default: [
-          {
-            type: 'tooltip',
-            formatText: function formatText(model) {
-              console.log('model', model);
-              return `<div>ID: ${model.id}</div>
-              <div>位置: (${model.x},${model.y})</div>`;
-            },
-            shouldUpdate: (e) => true,
-          },
-        ],
-      },
+      // modes: {
+      //   default: [
+      //     {
+      //       type: 'tooltip',
+      //       formatText: function formatText(model) {
+      //         console.log('model', model);
+      //         return `<div>ID: ${model.n ? 'null' : model.id}</div>
+      //         <div>位置: (${model.x},${model.y})</div>`;
+      //       },
+      //       shouldUpdate: (e) => true,
+      //     },
+      //   ],
+      // },
       defaultNode: {
         type: 'breath-node',
         size: 5,
         style: {
           lineWidth: 0,
-          fill: 'rgb(240, 223, 83)',
+          // fill: 'rgb(240, 223, 83)',
+          fill: '#0BDD8B',
         },
       },
     });
-    graph.data({ nodes: n });
-    // fetch('https://gw.alipayobjects.com/os/basement_prod/8c2353b0-99a9-4a93-a5e1-3e7df1eac64f.json')
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     const nodes = data.nodes;
-    //     // const classMap = new Map();
-    //     // let classId = 0;
-    //     nodes.forEach(function (node) {
-    //       node.y = -node.y;
-    //     });
-    //     scaleNodesPoints(nodes, graphSize);
-    //     console.log('data', data)
-    //     // graph.data(data);
-    //     graph.data({ nodes: n })
-    //     graph.render();
-    //   });
+    DeviceGetRoomOfDeviceList({ roomId }).then((res) => {
+      console.log('p', res);
+      if (res?.data) {
+        const graphData = res.data.map((d: any) => ({
+          id: `${d.deviceId}`,
+          name: d.deviceName,
+          x: d.locateX,
+          y: d.locateY,
+        }));
+        graph.data({ nodes: graphData });
+        let usedGraphData = graphData;
 
-    graph.on('node:click', (e) => console.log('e', e));
+        // graph.on('node:mouseenter', (e) => {
+        //   console.log('e', e.item?._cfg?.model)
+        //   const graphDataClone = cloneDeep(usedGraphData);
+        //   graphDataClone.find((data: any) => data.id === e.item?._cfg?.model?.id).n = true;
+        //   usedGraphData = graphDataClone;
+        //   graph.data({ nodes: graphDataClone });
+        //   graph.render();
+        // });
+        // graph.on('node:mouseleave', (e) => console.log('eo', e));
+        graph.get(
+          'container',
+        ).style.backgroundImage = `url(${apiUrl}/files/${roomPicPath})`;
+        graph.get('container').style.backgroundSize = '900px 700px';
+        graph.get('container').style.backgroundRepeat = 'no-repeat';
+        setInnerGraph(graph);
+        graph.render();
 
-    graph.get('container').style.backgroundImage = `url(${a})`;
-    // graph.get('container').style.backgroundImage = 'url("https://gw.alipayobjects.com/mdn/rms_f8c6a0/afts/img/A*G23iRqkiibIAAAAAAAAAAABkARQnAQ")';
-    graph.get('container').style.backgroundSize = '900px 700px';
-    graph.get('container').style.backgroundRepeat = 'no-repeat';
-    setInnerGraph(graph);
-    graph.render();
+        const getRoomAlarmPoint = () => {
+          DeviceGetAlarmOfDevice({ id: roomId }).then((res) => {
+            console.log('res', res);
+            if (res.data) {
+              const errorPointList: number[] = res.data;
+              const graphDataClone = cloneDeep(usedGraphData);
+              graphDataClone.forEach((data: any) => {
+                if (data.error) {
+                  delete data.error;
+                }
+                if (data.style) {
+                  delete data.style;
+                }
+              });
+              errorPointList.forEach((point) => {
+                const errorPointData = graphDataClone.find(
+                  (data: any) => data.id === `${point}`,
+                );
+                if (errorPointData) {
+                  errorPointData.error = true;
+                  errorPointData.style = { fill: 'red' };
+                }
+              });
+              usedGraphData = graphDataClone;
+              graph.data({ nodes: graphDataClone });
+              graph.render();
+            }
+          });
+        };
+        getRoomAlarmPoint();
+        runtimeRef.current.roomAlarmPointInterval = setInterval(
+          getRoomAlarmPoint,
+          10000,
+        );
+      }
+    });
   };
   const removeInnerMap = () => {
     innerGraph?.destroy();
-    setIsInnerMap(false);
+    setIsInnerMap({ inner: false, data: null });
+    const container = document.getElementById('container');
+    if (container) {
+      document.getElementById('containerr')?.removeChild(container);
+    }
   };
 
   const getOffsetTop = (obj: any) => {
@@ -530,23 +579,74 @@ const IndexPage: React.FC = () => {
   };
   const mapClick = (e: React.MouseEvent) => {
     const box = document.getElementById('regionalMap');
-    const clientX = e.clientX;
-    const clientY = e.clientY;
-    const offsetX = e.clientX - getOffsetLeft(box);
-    const offsetY = e.clientY - getOffsetTop(box);
-    const offsetPerX = offsetX / box!.offsetWidth;
-    const offsetPerY = offsetY / box!.offsetHeight;
-    console.log(
-      'e',
-      `(${clientX},${clientY})`,
-      `(${offsetX},${offsetY})`,
-      `${offsetPerX},${offsetPerY}`,
+    const zoom = runtimeRef.current.zoom;
+    const offsetWidth = box!.offsetWidth * zoom;
+    const offsetHeight = box!.offsetHeight * zoom;
+    const offsetX = e.clientX - getOffsetLeft(box) * zoom;
+    const offsetY = e.clientY - getOffsetTop(box) * zoom;
+    const offsetPerX = offsetX / offsetWidth;
+    const offsetPerY = offsetY / offsetHeight;
+    // console.log('mapPercentData', mapPercentData)
+    // console.log('e', `(${offsetPerX},${offsetPerY})`);
+
+    const clickPoint = mapPercentData.find(
+      (data) =>
+        offsetPerX >= data.accessX[0] &&
+        offsetPerX <= data.accessX[1] &&
+        offsetPerY >= data.accessY[0] &&
+        offsetPerY <= data.accessY[1],
     );
-    const div = document.createElement('div');
-    div.id = 'container';
-    document.getElementById('containerr')?.appendChild(div);
-    setIsInnerMap(true);
-    DrawInnerMap();
+    if (clickPoint) {
+      const clickPointData = mapData.find((data) => data.id === clickPoint.id);
+      console.log('p', clickPoint, clickPointData);
+      if (clickPointData.linked === 1 && clickPointData.rooms?.length) {
+        const container = document.getElementById('container');
+        if (container) {
+          document.getElementById('containerr')?.removeChild(container);
+        }
+        const div = document.createElement('div');
+        div.id = 'container';
+        document.getElementById('containerr')?.appendChild(div);
+        setIsInnerMap({
+          inner: true,
+          data: {
+            pointId: clickPointData.rooms[0].pointId,
+            roomId: clickPointData.rooms[0].roomId,
+            roomName: clickPointData.rooms[0].roomName,
+            roomPicPath: clickPointData.rooms[0].roomPicPath,
+          },
+        });
+        setShowNamePoint(null);
+        DrawInnerMap(
+          clickPointData.rooms[0].roomId,
+          clickPointData.rooms[0].roomPicPath,
+        );
+      }
+    }
+  };
+
+  const mapHover = (e: React.MouseEvent) => {
+    const box = document.getElementById('regionalMap');
+    const zoom = runtimeRef.current.zoom;
+    const offsetWidth = box!.offsetWidth * zoom;
+    const offsetHeight = box!.offsetHeight * zoom;
+    const offsetX = e.clientX - getOffsetLeft(box) * zoom;
+    const offsetY = e.clientY - getOffsetTop(box) * zoom;
+    const offsetPerX = offsetX / offsetWidth;
+    const offsetPerY = offsetY / offsetHeight;
+
+    const hoverPoint = mapPercentData.find(
+      (data) =>
+        offsetPerX >= data.accessX[0] &&
+        offsetPerX <= data.accessX[1] &&
+        offsetPerY >= data.accessY[0] &&
+        offsetPerY <= data.accessY[1],
+    );
+    if (hoverPoint) {
+      setShowNamePoint(hoverPoint.id);
+    } else {
+      setShowNamePoint(null);
+    }
   };
 
   useEffect(() => {
@@ -742,7 +842,7 @@ const IndexPage: React.FC = () => {
                   </div>
                 </div>
                 <div className={styles.mapArea}>
-                  <KWHArea data={leftAreaData} />
+                  <KWHArea data={mapPowerSumList} />
                 </div>
               </div>
             </div>
@@ -750,48 +850,30 @@ const IndexPage: React.FC = () => {
           <div className={styles.bodyMiddle}>
             <div
               className={styles.outerMap}
-              style={{ display: isInnerMap ? 'none' : 'flex' }}
+              style={{ display: isInnerMap.inner ? 'none' : 'flex' }}
             >
               <MapHeader data={deviceIndexNum} />
               <div
                 className={styles.regionalMap}
                 id="regionalMap"
                 onClick={mapClick}
+                onMouseMove={mapHover}
               >
                 <FlylineChart
                   data={mapData}
                   errorPoints={deviceAlarmPointData}
+                  showNamePoint={showNamePoint}
                 />
               </div>
             </div>
             <div
               className={styles.innerMap}
               id="containerr"
-              style={{ display: isInnerMap ? 'block' : 'none' }}
+              style={{ display: isInnerMap.inner ? 'block' : 'none' }}
             >
-              <div
-                style={{
-                  color: '#fff',
-                  position: 'absolute',
-                  top: 0,
-                  width: '100%',
-                  textAlign: 'center',
-                  pointerEvents: 'none',
-                  fontSize: 28,
-                  fontWeight: 'bold',
-                }}
-              >
-                机房名称
-              </div>
+              <div className={styles.roomName}>{isInnerMap.data?.roomName}</div>
               <LeftCircleOutlined
-                style={{
-                  color: '#fff',
-                  position: 'absolute',
-                  top: 8,
-                  right: 8,
-                  padding: 3,
-                  fontSize: 18,
-                }}
+                className={styles.backIcon}
                 onClick={removeInnerMap}
                 title="返回"
               />
@@ -862,18 +944,26 @@ const IndexPage: React.FC = () => {
               >
                 <div className={styles.contentTitle}>温湿度</div>
                 <div className={styles.tabs}>
-                  <Tabs
-                    type="card"
-                    className={`${styles.tab} ${styles.wrapTab}`}
-                    activeKey={rightActiveKey}
-                    onChange={(activeKey) => setRightActiveKey(activeKey)}
-                  >
-                    {deviceThiData.map((data) => (
-                      <Tabs.TabPane tab={data.groupName} key={data.groupKey}>
-                        <THTable data={data.groupData} />
-                      </Tabs.TabPane>
-                    ))}
-                  </Tabs>
+                  {deviceThiData.length > 1 ? (
+                    <Tabs
+                      type="card"
+                      className={`${styles.tab} ${styles.wrapTab}`}
+                      activeKey={rightActiveKey}
+                      onChange={(activeKey) => setRightActiveKey(activeKey)}
+                    >
+                      {deviceThiData.map((data) => (
+                        <Tabs.TabPane tab={data.groupName} key={data.groupKey}>
+                          <THTable data={data.groupData} />
+                        </Tabs.TabPane>
+                      ))}
+                    </Tabs>
+                  ) : deviceThiData.length === 1 ? (
+                    <div style={{ marginBottom: 42 }}>
+                      <THTable data={deviceThiData[0].groupData} />
+                    </div>
+                  ) : (
+                    ''
+                  )}
                 </div>
               </div>
             </div>

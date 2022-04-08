@@ -23,6 +23,7 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
       data={[axesData, axesData]}
       xField="alarmMonth"
       yField={['alarmNum', 'alarmLine']}
+      // appendPadding={[8, 0, 0, 0]}
       meta={{
         alarmNum: {
           alias: '告警次数',
@@ -39,6 +40,20 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
           columnStyle: {
             radius: [20, 20, 0, 0],
           },
+          // label: {
+          //   formatter: (data: any) => {
+          //     console.log('t', data)
+          //     return data.alarmNum;
+          //   },
+          //   // autoHide: false,
+          //   // style: {
+          //   //   fill: 'red',
+          //   //   color: '#000',
+          //   //   fontSize: 80,
+          //   //   stroke: 'red',
+          //   //   // fontWeight: 'bold'
+          //   // }
+          // }
         },
         {
           geometry: 'line',

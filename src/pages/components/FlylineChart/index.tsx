@@ -18,6 +18,7 @@ interface pointType {
 interface FlylineChartProps {
   data: pointType[];
   errorPoints: number[];
+  showNamePoint: number | null;
 }
 
 interface MapPointType {
@@ -32,11 +33,12 @@ interface MapLineType {
   target: string;
   color?: string;
   orbitColor?: string;
+  radius?: number;
 }
 
 const FlylineChart: React.FC<FlylineChartProps> = (props) => {
-  const { data, errorPoints } = props;
-  // console.log('data', data)
+  const { data, errorPoints, showNamePoint } = props;
+  // console.log('data', showNamePoint)
 
   let corePointId: number | null = null;
   let corePointName: string | null = null;
@@ -56,6 +58,9 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
           width: 30,
           height: 30,
         },
+        text: {
+          show: showNamePoint !== null && d.id === showNamePoint,
+        },
       };
     }
     return {
@@ -65,6 +70,9 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
         src: errorPoints.find((point) => point === d.id)
           ? mapErrorPoint
           : mapPoint,
+      },
+      text: {
+        show: showNamePoint !== null && d.id === showNamePoint,
       },
     };
   });
@@ -100,7 +108,8 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
           height: 30,
         },
         text: {
-          show: false,
+          // show: false,
+          color: '#fff',
         },
         bgImgSrc: map,
         line: {
@@ -108,6 +117,8 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
           width: 2,
           color: corePointError ? 'transparent' : '#B5D3FB',
         },
+        curvature: 2.5,
+        // k: -0.6
       }}
       style={{ width: '100%', height: '100%' }}
     />

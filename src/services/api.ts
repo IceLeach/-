@@ -36,10 +36,10 @@ export async function AlarmEventGetSumList() {
   });
 }
 
-export async function DeviceGetRoomOfDeviceList(params: any) {
+export async function DeviceGetRoomOfDeviceList(data: any) {
   return request(`/screen/api/device/getRoomOfDeviceList`, {
     method: 'post',
-    params,
+    data,
   });
 }
 
@@ -63,6 +63,12 @@ export async function DeviceThi() {
 
 export async function MapGetPowerSumList(params: { id: number }) {
   return request(`/screen/api/map/getPowerSumList/${params.id}`, {
+    method: 'get',
+  });
+}
+
+export async function DeviceGetAlarmOfDevice(params: { id: number }) {
+  return request(`/screen/api/device/getAlarmOfDevice/${params.id}`, {
     method: 'get',
   });
 }
