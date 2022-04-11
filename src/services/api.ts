@@ -72,3 +72,9 @@ export async function DeviceGetAlarmOfDevice(params: { id: number }) {
     method: 'get',
   });
 }
+
+export async function DeviceGetMonitoring(params: { id: number }) {
+  return request(`/screen/api/device/getMonitoring/${params.id}`, {
+    method: 'get',
+  });
+}

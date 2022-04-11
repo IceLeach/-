@@ -38,7 +38,6 @@ interface MapLineType {
 
 const FlylineChart: React.FC<FlylineChartProps> = (props) => {
   const { data, errorPoints, showNamePoint } = props;
-  // console.log('data', showNamePoint)
 
   let corePointId: number | null = null;
   let corePointName: string | null = null;

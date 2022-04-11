@@ -33,19 +33,19 @@ const MapHeader: React.FC<MapHeaderProps> = (props) => {
     <div className={styles.mapHeader}>
       <div className={styles.headerItem}>
         <img src={mapTop1} />
-        <div className={styles.itemTitle}>接入节点数</div>
+        <div className={styles.itemTitle}>节点数</div>
         <div className={styles.itemNumber}>
           {getNumberString(data.monitorNum)}
         </div>
       </div>
       <div className={styles.headerItem}>
         <img src={mapTop2} />
-        <div className={styles.itemTitle}>接入机房数</div>
+        <div className={styles.itemTitle}>机房数</div>
         <div className={styles.itemNumber}>{getNumberString(data.roomNum)}</div>
       </div>
       <div className={styles.headerItem}>
         <img src={mapTop3} />
-        <div className={styles.itemTitle}>接入设备数</div>
+        <div className={styles.itemTitle}>设备数</div>
         <div className={styles.itemNumber}>
           {getNumberString(data.deviceNum)}
         </div>

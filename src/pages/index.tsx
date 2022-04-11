@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'umi';
 import { Select, Tabs } from 'antd';
 import {
@@ -27,6 +21,10 @@ import {
   MapGetPowerSumList,
   MapPointList,
 } from '@/services/api';
+import { apiUrl } from '@/utils/request';
+import { cloneDeep } from 'lodash';
+import ReactDOM from 'react-dom';
+import DraggableModal from './components/DraggableModal';
 // import ScrollTable, { scrollRef } from './components/ScrollTable';
 import StateCard from './components/StateCard';
 import HistoryDualAxes from './components/HistoryDualAxes';
@@ -37,11 +35,10 @@ import THTable, { THTableRow } from './components/THTable';
 import KWHArea from './components/KWHArea';
 import MapHeader, { DeviceIndexNumType } from './components/MapHeader';
 import CircleProgress from './components/CircleProgress';
+import MapLegend from './components/MapLegend';
 // @ts-ignore
 import logo from '@/assets/logo.ico';
 import styles from './index.less';
-import { apiUrl } from '@/utils/request';
-import { cloneDeep } from 'lodash';
 
 interface RuntimeRefType {
   zoom: number;
@@ -194,7 +191,6 @@ const IndexPage: React.FC = () => {
   useEffect(() => {
     MapPointList().then((res) => {
       if (res?.data) {
-        console.log('res', res);
         setMapData(res.data);
         const points = res.data.map((d: any) => ({
           id: d.id,
@@ -257,7 +253,6 @@ const IndexPage: React.FC = () => {
               groupData: res.data.slice(i * 5, (i + 1) * 5),
             });
           }
-          // setRightTopData(rtData);
           setDeviceThiData(rtData);
         }
       });
@@ -356,9 +351,7 @@ const IndexPage: React.FC = () => {
     const url = `/weather/data/cityinfo/${cityCode}.html`;
     // const url = `/weather/data/sk/${cityCode}.html`;
     fetch(url).then((res) => {
-      // console.log('res', res)
       res.json().then((resJson) => {
-        console.log('resJson', resJson);
         setWeatherData(resJson?.weatherinfo ?? {});
       });
     });
@@ -416,6 +409,28 @@ const IndexPage: React.FC = () => {
   //     return bottomData.length;
   //   }
   // };
+
+  const closeDragBox = (id: string) => {
+    const box = document.getElementById(id);
+    if (box) {
+      document.getElementById('dragBoxArea')?.removeChild(box);
+    }
+  };
+  const createDragBox = (data: any, client: { x: number; y: number }) => {
+    if (!document.getElementById(`box-${data.id}`)) {
+      const div = document.createElement('div');
+      div.id = `box-${data.id}`;
+      document.getElementById('dragBoxArea')?.appendChild(div);
+      const DragBox = (
+        <DraggableModal
+          data={data}
+          defaultPosition={client}
+          onClose={() => closeDragBox(`box-${data.id}`)}
+        />
+      );
+      ReactDOM.render(DragBox, div);
+    }
+  };
 
   const DrawInnerMap = (roomId: number, roomPicPath: string) => {
     G6.registerNode(
@@ -485,7 +500,7 @@ const IndexPage: React.FC = () => {
       },
     });
     DeviceGetRoomOfDeviceList({ roomId }).then((res) => {
-      console.log('p', res);
+      // console.log('p', res);
       if (res?.data) {
         const graphData = res.data.map((d: any) => ({
           id: `${d.deviceId}`,
@@ -496,15 +511,31 @@ const IndexPage: React.FC = () => {
         graph.data({ nodes: graphData });
         let usedGraphData = graphData;
 
-        // graph.on('node:mouseenter', (e) => {
-        //   console.log('e', e.item?._cfg?.model)
-        //   const graphDataClone = cloneDeep(usedGraphData);
-        //   graphDataClone.find((data: any) => data.id === e.item?._cfg?.model?.id).n = true;
-        //   usedGraphData = graphDataClone;
-        //   graph.data({ nodes: graphDataClone });
-        //   graph.render();
+        // graph.on('node:click', (e) => {
+        //   console.log('e', e, e.item?._cfg?.model);
+        //   createDragBox(e.item?._cfg?.model, { x: e.clientX, y: e.clientY });
         // });
-        // graph.on('node:mouseleave', (e) => console.log('eo', e));
+        graph.on('click', (e) => {
+          // console.log(e.originalEvent)
+          // @ts-ignore
+          const offsetX = e.originalEvent.offsetX / runtimeRef.current.zoom;
+          // @ts-ignore
+          const offsetY = e.originalEvent.offsetY / runtimeRef.current.zoom;
+          const point = graphData.find(
+            (data: any) =>
+              offsetX >= data.x - 3 &&
+              offsetX <= data.x + 3 &&
+              offsetY >= data.y - 3 &&
+              offsetY <= data.y + 3,
+          );
+          if (point) {
+            // @ts-ignore
+            createDragBox(point, {
+              x: e.originalEvent.clientX / runtimeRef.current.zoom,
+              y: e.originalEvent.clientY / runtimeRef.current.zoom,
+            });
+          }
+        });
         graph.get(
           'container',
         ).style.backgroundImage = `url(${apiUrl}/files/${roomPicPath})`;
@@ -515,7 +546,6 @@ const IndexPage: React.FC = () => {
 
         const getRoomAlarmPoint = () => {
           DeviceGetAlarmOfDevice({ id: roomId }).then((res) => {
-            console.log('res', res);
             if (res.data) {
               const errorPointList: number[] = res.data;
               const graphDataClone = cloneDeep(usedGraphData);
@@ -598,7 +628,7 @@ const IndexPage: React.FC = () => {
     );
     if (clickPoint) {
       const clickPointData = mapData.find((data) => data.id === clickPoint.id);
-      console.log('p', clickPoint, clickPointData);
+      // console.log('p', clickPoint, clickPointData);
       if (clickPointData.linked === 1 && clickPointData.rooms?.length) {
         const container = document.getElementById('container');
         if (container) {
@@ -661,6 +691,7 @@ const IndexPage: React.FC = () => {
         <title>宁波港大屏</title>
       </Helmet>
       <div className={styles.main} id="main">
+        <div id="dragBoxArea" className={styles.dragBoxArea}></div>
         <div className={styles.top}>
           <div className={styles.topLeft}>
             <DateTime />
@@ -865,6 +896,7 @@ const IndexPage: React.FC = () => {
                   showNamePoint={showNamePoint}
                 />
               </div>
+              <MapLegend />
             </div>
             <div
               className={styles.innerMap}
