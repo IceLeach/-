@@ -1,6 +1,6 @@
 // export const apiUrl = 'http://localhost';
-export const apiUrl = 'http://192.168.1.125';
-// export const apiUrl = 'https://wx.chinalx.com';
+// export const apiUrl = 'http://192.168.1.125';
+export const apiUrl = 'https://wx.chinalx.com';
 
 /**
  * request 网络请求工具

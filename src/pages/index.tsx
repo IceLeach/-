@@ -491,7 +491,7 @@ const IndexPage: React.FC = () => {
       // },
       defaultNode: {
         type: 'breath-node',
-        size: 5,
+        size: 6,
         style: {
           lineWidth: 0,
           // fill: 'rgb(240, 223, 83)',
@@ -529,9 +529,10 @@ const IndexPage: React.FC = () => {
               offsetY <= data.y + 3,
           );
           if (point) {
-            // @ts-ignore
             createDragBox(point, {
+              // @ts-ignore
               x: e.originalEvent.clientX / runtimeRef.current.zoom,
+              // @ts-ignore
               y: e.originalEvent.clientY / runtimeRef.current.zoom,
             });
           }
@@ -703,6 +704,7 @@ const IndexPage: React.FC = () => {
             <div className={styles.weather}>{`${weatherData.city ?? ''}  ${
               weatherData.temp1 ?? ''
             } - ${weatherData.temp2 ?? ''}  ${weatherData.weather ?? ''}`}</div>
+            {/* <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=te&skin=pitaya&color=FFFFFF" frameborder="0" width="200" height="24" allowtransparency="true" /> */}
             <img src={logo} className={styles.logo} />
           </div>
         </div>
