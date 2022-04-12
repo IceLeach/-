@@ -8,7 +8,7 @@ const DateTime: React.FC = () => {
 
   useEffect(() => {
     setInterval(() => {
-      setDateTime(moment().format('HH:mm:ss\xa0\xa0YYYY年M月D日\xa0\xa0dddd'));
+      setDateTime(moment().format('YYYY年M月D日\xa0\xa0dddd\xa0\xa0HH:mm:ss'));
     }, 1000);
   }, []);
 

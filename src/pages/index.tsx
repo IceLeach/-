@@ -21,21 +21,22 @@ import {
   MapGetPowerSumList,
   MapPointList,
 } from '@/services/api';
-import { apiUrl } from '@/utils/request';
+import { apiUrl, fileUrl } from '@/utils/request';
 import { cloneDeep } from 'lodash';
 import ReactDOM from 'react-dom';
 import DraggableModal from './components/DraggableModal';
 // import ScrollTable, { scrollRef } from './components/ScrollTable';
 import StateCard from './components/StateCard';
 import HistoryDualAxes from './components/HistoryDualAxes';
-import FlylineChart from './components/FlylineChart';
-import DateTime from './components/DateTime';
+// import DateTime from './components/DateTime';
 import AlarmTable from './components/AlarmTable';
 import THTable, { THTableRow } from './components/THTable';
 import KWHArea from './components/KWHArea';
 import MapHeader, { DeviceIndexNumType } from './components/MapHeader';
 import CircleProgress from './components/CircleProgress';
 import MapLegend from './components/MapLegend';
+import FlylineMap from './components/FlylineMap';
+import DateTime from './components/DateTime';
 // @ts-ignore
 import logo from '@/assets/logo.ico';
 import styles from './index.less';
@@ -48,6 +49,8 @@ interface RuntimeRefType {
   rightTabsInterval: NodeJS.Timer | null;
   mapAlarmPointInterval: NodeJS.Timer | null;
   roomAlarmPointInterval: NodeJS.Timer | null;
+  pointModalList: string[];
+  pointIntervalList: NodeJS.Timer[];
 }
 interface RightTopDataType {
   groupKey: string;
@@ -113,7 +116,7 @@ const IndexPage: React.FC = () => {
     data: null,
   });
   const [innerGraph, setInnerGraph] = useState<Graph | null>(null);
-  const [weatherData, setWeatherData] = useState<any>({});
+  // const [weatherData, setWeatherData] = useState<any>({});
   const [mapData, setMapData] = useState<any[]>([]);
   const [mapPercentData, setMapPercentData] = useState<MapPercentDataType[]>(
     [],
@@ -144,6 +147,8 @@ const IndexPage: React.FC = () => {
     rightTabsInterval: null,
     mapAlarmPointInterval: null,
     roomAlarmPointInterval: null,
+    pointModalList: [],
+    pointIntervalList: [],
   });
 
   // const ws = useRef<WebSocket | null>(null);
@@ -346,16 +351,16 @@ const IndexPage: React.FC = () => {
     };
   }, [isInnerMap.inner]);
 
-  const getWeather = () => {
-    const cityCode = '101210401';
-    const url = `/weather/data/cityinfo/${cityCode}.html`;
-    // const url = `/weather/data/sk/${cityCode}.html`;
-    fetch(url).then((res) => {
-      res.json().then((resJson) => {
-        setWeatherData(resJson?.weatherinfo ?? {});
-      });
-    });
-  };
+  // const getWeather = () => {
+  //   const cityCode = '101210401';
+  //   const url = `/weather/data/cityinfo/${cityCode}.html`;
+  //   // const url = `/weather/data/sk/${cityCode}.html`;
+  //   fetch(url).then((res) => {
+  //     res.json().then((resJson) => {
+  //       setWeatherData(resJson?.weatherinfo ?? {});
+  //     });
+  //   });
+  // };
 
   const changeLeftTab = () => {
     setLeftActiveKey((activeKey) => {
@@ -416,8 +421,19 @@ const IndexPage: React.FC = () => {
       document.getElementById('dragBoxArea')?.removeChild(box);
     }
   };
+  const saveInterval = (interval: NodeJS.Timer) => {
+    runtimeRef.current.pointIntervalList.push(interval);
+  };
   const createDragBox = (data: any, client: { x: number; y: number }) => {
     if (!document.getElementById(`box-${data.id}`)) {
+      runtimeRef.current.pointModalList.forEach((p) => {
+        closeDragBox(`box-${p}`);
+      });
+      runtimeRef.current.pointModalList = [];
+      runtimeRef.current.pointIntervalList.forEach((i) => {
+        clearRefInterval(i);
+      });
+      runtimeRef.current.pointIntervalList = [];
       const div = document.createElement('div');
       div.id = `box-${data.id}`;
       document.getElementById('dragBoxArea')?.appendChild(div);
@@ -426,9 +442,11 @@ const IndexPage: React.FC = () => {
           data={data}
           defaultPosition={client}
           onClose={() => closeDragBox(`box-${data.id}`)}
+          saveInterval={saveInterval}
         />
       );
       ReactDOM.render(DragBox, div);
+      runtimeRef.current.pointModalList.push(data.id);
     }
   };
 
@@ -539,7 +557,7 @@ const IndexPage: React.FC = () => {
         });
         graph.get(
           'container',
-        ).style.backgroundImage = `url(${apiUrl}/files/${roomPicPath})`;
+        ).style.backgroundImage = `url(${fileUrl}${roomPicPath})`;
         graph.get('container').style.backgroundSize = '900px 700px';
         graph.get('container').style.backgroundRepeat = 'no-repeat';
         setInnerGraph(graph);
@@ -582,6 +600,14 @@ const IndexPage: React.FC = () => {
     });
   };
   const removeInnerMap = () => {
+    runtimeRef.current.pointModalList.forEach((p) => {
+      closeDragBox(`box-${p}`);
+    });
+    runtimeRef.current.pointModalList = [];
+    runtimeRef.current.pointIntervalList.forEach((i) => {
+      clearRefInterval(i);
+    });
+    runtimeRef.current.pointIntervalList = [];
     innerGraph?.destroy();
     setIsInnerMap({ inner: false, data: null });
     const container = document.getElementById('container');
@@ -680,16 +706,17 @@ const IndexPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    getWeather();
-    setInterval(getWeather, 3600000);
-    // runtimeRef.current.scrollTableInterval = setInterval(tableScroll, 2000);
-  }, []);
+  // useEffect(() => {
+  //   getWeather();
+  //   setInterval(getWeather, 3600000);
+  //   // runtimeRef.current.scrollTableInterval = setInterval(tableScroll, 2000);
+  // }, []);
 
   return (
     <>
       <Helmet>
-        <title>宁波港大屏</title>
+        <title>宁波舟山港大屏</title>
+        <link rel="shortcut icon" href={logo}></link>
       </Helmet>
       <div className={styles.main} id="main">
         <div id="dragBoxArea" className={styles.dragBoxArea}></div>
@@ -701,9 +728,8 @@ const IndexPage: React.FC = () => {
             <div className={styles.title}>宁波舟山港动环监控平台</div>
           </div>
           <div className={styles.topRight}>
-            <div className={styles.weather}>{`${weatherData.city ?? ''}  ${
-              weatherData.temp1 ?? ''
-            } - ${weatherData.temp2 ?? ''}  ${weatherData.weather ?? ''}`}</div>
+            {/* <div className={styles.weather}>{`${weatherData.city ?? ''}  ${weatherData.temp1 ?? ''
+              } - ${weatherData.temp2 ?? ''}  ${weatherData.weather ?? ''}`}</div> */}
             {/* <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=te&skin=pitaya&color=FFFFFF" frameborder="0" width="200" height="24" allowtransparency="true" /> */}
             <img src={logo} className={styles.logo} />
           </div>
@@ -739,7 +765,7 @@ const IndexPage: React.FC = () => {
                                   ? deviceData.normalNum + deviceData.faultNum
                                   : ''}
                               </div>
-                              <div className={styles.text}>接入设备总数</div>
+                              <div className={styles.text}>设备总数</div>
                             </div>
                             <div className={styles.dataGreen}>
                               <div className={styles.number}>
@@ -764,7 +790,7 @@ const IndexPage: React.FC = () => {
             <div className={styles.leftBottom}>
               <div className={styles.content}>
                 <div className={styles.titleLine}>
-                  <div className={styles.contentTitle}>用电统计</div>
+                  <div className={styles.contentTitle}>用电设备</div>
                   <Select
                     className={styles.select}
                     value={leftSelectKey}
@@ -874,6 +900,12 @@ const IndexPage: React.FC = () => {
                     />
                   </div>
                 </div>
+                <div
+                  className={styles.contentTitle}
+                  style={{ marginBottom: 6 }}
+                >
+                  用电统计
+                </div>
                 <div className={styles.mapArea}>
                   <KWHArea data={mapPowerSumList} />
                 </div>
@@ -892,7 +924,7 @@ const IndexPage: React.FC = () => {
                 onClick={mapClick}
                 onMouseMove={mapHover}
               >
-                <FlylineChart
+                <FlylineMap
                   data={mapData}
                   errorPoints={deviceAlarmPointData}
                   showNamePoint={showNamePoint}
@@ -1003,7 +1035,7 @@ const IndexPage: React.FC = () => {
             </div>
             <div className={styles.rightBottom}>
               <div className={styles.content}>
-                <div className={styles.contentTitle}>历史告警统计</div>
+                <div className={styles.contentTitle}>告警统计</div>
                 <div className={styles.historyArea}>
                   <HistoryDualAxes data={alarmEventSumList} />
                 </div>

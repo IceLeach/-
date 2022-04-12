@@ -14,17 +14,25 @@ interface DraggableModalProps {
     y: number;
   };
   onClose: () => void;
+  saveInterval: (interval: NodeJS.Timer) => void;
 }
 
 const DraggableModal: React.FC<DraggableModalProps> = (props) => {
-  const { data, defaultPosition, onClose } = props;
+  const { data, defaultPosition, onClose, saveInterval } = props;
   const runtimeRef = useRef<NodeJS.Timer | null>(null);
   const [modalData, setModalData] = useState<any[]>([]);
+
+  const closeModal = () => {
+    if (runtimeRef.current) {
+      clearInterval(runtimeRef.current);
+    }
+    onClose();
+  };
 
   useEffect(() => {
     const getMonitoring = () => {
       DeviceGetMonitoring({ id: parseInt(data.id) }).then((res) => {
-        console.log('res', res);
+        // console.log('res', res);
         if (res?.data) {
           setModalData(res.data);
         }
@@ -35,14 +43,8 @@ const DraggableModal: React.FC<DraggableModalProps> = (props) => {
     }
     getMonitoring();
     runtimeRef.current = setInterval(getMonitoring, 10000);
+    saveInterval(runtimeRef.current);
   }, []);
-
-  const closeModal = () => {
-    if (runtimeRef.current) {
-      clearInterval(runtimeRef.current);
-    }
-    onClose();
-  };
 
   return (
     <Draggable key={data.id} defaultPosition={defaultPosition}>
@@ -52,17 +54,29 @@ const DraggableModal: React.FC<DraggableModalProps> = (props) => {
         <div className={styles.dataBox}>
           {modalData.map((data) => (
             <div className={styles.dataItem} key={data.id}>
-              <span style={{ paddingRight: 12 }}>{data.name}</span>
-              {data.value && (
-                <span
-                  style={{ color: data.alarm === 1 ? '#FF5151' : '#6CFF9A' }}
-                >
-                  {data.value}
-                </span>
-              )}
-              {data.value && data.unit && (
-                <span className={styles.unit}>{data.unit}</span>
-              )}
+              <span
+                title={data.name}
+                style={{
+                  paddingLeft: 2,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {data.name}
+              </span>
+              <span style={{ paddingRight: 8, marginLeft: 'auto' }}>
+                {data.value && (
+                  <span
+                    style={{ color: data.alarm === 1 ? '#FF5151' : '#6CFF9A' }}
+                  >
+                    {data.value}
+                  </span>
+                )}
+                {data.value && data.unit && (
+                  <span className={styles.unit}>{data.unit}</span>
+                )}
+              </span>
             </div>
           ))}
         </div>

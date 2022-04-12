@@ -9,7 +9,7 @@ const KWHArea: React.FC<KWHAreaProps> = (props) => {
   const { data } = props;
   const areaData = data.map((d) => ({
     type: d.type,
-    powerMonth: `${d.powerMonth}月`,
+    powerMonth: `${d.powerMonth}`,
     powerNum: d.powerNum,
   }));
 
@@ -23,8 +23,8 @@ const KWHArea: React.FC<KWHAreaProps> = (props) => {
       smooth={true}
       xAxis={{
         label: {
-          offsetX: 10,
-          rotate: 45,
+          // offsetX: 10,
+          // rotate: 45,
           // formatter: (text: string) => {
           //   return `${text}月`;
           // },

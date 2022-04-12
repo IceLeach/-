@@ -22,7 +22,7 @@ const MapLegend: React.FC = () => {
       </div>
       <div className={styles.line}>
         <span className={styles.icons}>
-          <img src={mapErrorPoint} className={styles.icon} />
+          {/* <img src={mapErrorPoint} className={styles.icon} /> */}
           <img src={mapCenterErrorPoint} className={styles.icon} />
         </span>
         <span>运行异常</span>

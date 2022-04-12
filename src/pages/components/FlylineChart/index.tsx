@@ -7,7 +7,7 @@ import mapCenterPoint from '@/assets/mapCenterPoint.png';
 import mapErrorPoint from '@/assets/mapErrorPoint.png';
 import mapCenterErrorPoint from '@/assets/mapCenterErrorPoint.png';
 
-interface pointType {
+export interface pointType {
   corePoint: number;
   id: number;
   locateX: number;
@@ -18,7 +18,6 @@ interface pointType {
 interface FlylineChartProps {
   data: pointType[];
   errorPoints: number[];
-  showNamePoint: number | null;
 }
 
 interface MapPointType {
@@ -37,7 +36,7 @@ interface MapLineType {
 }
 
 const FlylineChart: React.FC<FlylineChartProps> = (props) => {
-  const { data, errorPoints, showNamePoint } = props;
+  const { data, errorPoints } = props;
 
   let corePointId: number | null = null;
   let corePointName: string | null = null;
@@ -52,13 +51,17 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
       return {
         name: d.name,
         coordinate: [d.locateX, d.locateY],
+        halo: {
+          show: true,
+        },
         icon: {
           src: corePointError ? mapCenterErrorPoint : mapCenterPoint,
           width: 30,
           height: 30,
         },
         text: {
-          show: showNamePoint !== null && d.id === showNamePoint,
+          // show: showNamePoint !== null && d.id === showNamePoint,
+          show: false,
         },
       };
     }
@@ -67,11 +70,14 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
       coordinate: [d.locateX, d.locateY],
       icon: {
         src: errorPoints.find((point) => point === d.id)
-          ? mapErrorPoint
+          ? mapCenterErrorPoint
           : mapPoint,
+        width: 22,
+        height: 22,
       },
       text: {
-        show: showNamePoint !== null && d.id === showNamePoint,
+        // show: showNamePoint !== null && d.id === showNamePoint,
+        show: false,
       },
     };
   });

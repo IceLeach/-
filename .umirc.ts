@@ -5,13 +5,15 @@ export default defineConfig({
   nodeModulesTransform: {
     type: 'none',
   },
+  // publicPath: '/nbgscreen/',
+  // routes: [{ path: '/nbgscreen/', component: '@/pages/index' }],
   routes: [{ path: '/', component: '@/pages/index' }],
   fastRefresh: {},
-  proxy: {
-    '/weather': {
-      target: 'http://www.weather.com.cn/',
-      changeOrigin: true,
-      pathRewrite: { '^/weather': '' },
-    },
-  },
+  // proxy: {
+  //   '/weather': {
+  //     target: 'http://www.weather.com.cn/',
+  //     changeOrigin: true,
+  //     pathRewrite: { '^/weather': '' },
+  //   },
+  // },
 });

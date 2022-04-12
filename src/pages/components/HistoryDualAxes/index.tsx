@@ -12,7 +12,7 @@ interface HistoryDualAxesProps {
 const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
   const { data } = props;
   const axesData = data.map((d) => ({
-    alarmMonth: `${d.alarmMonth}月`,
+    alarmMonth: `${d.alarmMonth}`,
     alarmNum: d.alarmNum,
     alarmLine: d.alarmNum,
   }));

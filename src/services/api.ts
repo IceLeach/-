@@ -1,80 +1,80 @@
 import request from '@/utils/request';
 
 export async function MapPointList() {
-  return request('/screen/api/map/pointList', {
+  return request('api/map/pointList', {
     method: 'get',
   });
 }
 
 export async function DeviceGetTypeList() {
-  return request('/screen/api/device/getTypeList', {
+  return request('api/device/getTypeList', {
     method: 'get',
   });
 }
 
 export async function DeviceGetSumList() {
-  return request('/screen/api/device/getSumList', {
+  return request('api/device/getSumList', {
     method: 'get',
   });
 }
 
 export async function DeviceGetIndexNum() {
-  return request('/screen/api/device/getIndexNum', {
+  return request('api/device/getIndexNum', {
     method: 'get',
   });
 }
 
 export async function AlarmEventGetLatest() {
-  return request('/screen/api/alarmEvent/getLatest', {
+  return request('api/alarmEvent/getLatest', {
     method: 'get',
   });
 }
 
 export async function AlarmEventGetSumList() {
-  return request('/screen/api/alarmEvent/getSumList', {
+  return request('api/alarmEvent/getSumList', {
     method: 'get',
   });
 }
 
 export async function DeviceGetRoomOfDeviceList(data: any) {
-  return request(`/screen/api/device/getRoomOfDeviceList`, {
+  return request(`api/device/getRoomOfDeviceList`, {
     method: 'post',
     data,
   });
 }
 
 export async function DeviceGetPowerOfDevice(params: { id: number }) {
-  return request(`/screen/api/device/getPowerOfDevice/${params.id}`, {
+  return request(`api/device/getPowerOfDevice/${params.id}`, {
     method: 'get',
   });
 }
 
 export async function DeviceGetAlarmOfPoint() {
-  return request('/screen/api/map/getAlarmOfPoint', {
+  return request('api/map/getAlarmOfPoint', {
     method: 'get',
   });
 }
 
 export async function DeviceThi() {
-  return request('/screen/api/device/thi', {
+  return request('api/device/thi', {
     method: 'get',
   });
 }
 
 export async function MapGetPowerSumList(params: { id: number }) {
-  return request(`/screen/api/map/getPowerSumList/${params.id}`, {
+  return request(`api/map/getPowerSumList/${params.id}`, {
     method: 'get',
   });
 }
 
 export async function DeviceGetAlarmOfDevice(params: { id: number }) {
-  return request(`/screen/api/device/getAlarmOfDevice/${params.id}`, {
+  return request(`api/device/getAlarmOfDevice/${params.id}`, {
     method: 'get',
   });
 }
 
 export async function DeviceGetMonitoring(params: { id: number }) {
-  return request(`/screen/api/device/getMonitoring/${params.id}`, {
+  return request(`api/device/getMonitoring/${params.id}`, {
     method: 'get',
   });
 }
