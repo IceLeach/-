@@ -30,8 +30,8 @@ export async function AlarmEventGetLatest() {
   });
 }
 
-export async function AlarmEventGetSumList() {
-  return request('api/alarmEvent/getSumList', {
+export async function AlarmEventGetSumList(params: { type: number }) {
+  return request(`api/alarmEvent/getSumList/${params.type}`, {
     method: 'get',
   });
 }
@@ -61,8 +61,8 @@ export async function DeviceThi() {
   });
 }
 
-export async function MapGetPowerSumList(params: { id: number }) {
-  return request(`api/map/getPowerSumList/${params.id}`, {
+export async function MapGetPowerSumList(params: { id: number; type: number }) {
+  return request(`api/map/getPowerSumList/${params.id}/${params.type}`, {
     method: 'get',
   });
 }
@@ -75,6 +75,12 @@ export async function DeviceGetAlarmOfDevice(params: { id: number }) {
 
 export async function DeviceGetMonitoring(params: { id: number }) {
   return request(`api/device/getMonitoring/${params.id}`, {
+    method: 'get',
+  });
+}
+
+export async function MapGetRunTime() {
+  return request('api/map/getRunTime', {
     method: 'get',
   });
 }

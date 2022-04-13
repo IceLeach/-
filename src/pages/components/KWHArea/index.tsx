@@ -3,13 +3,14 @@ import { Area } from '@ant-design/plots';
 
 interface KWHAreaProps {
   data: any[];
+  xField: string;
 }
 
 const KWHArea: React.FC<KWHAreaProps> = (props) => {
-  const { data } = props;
-  const areaData = data.map((d) => ({
+  const { data, xField } = props;
+  const areaData = data.map((d, i) => ({
     type: d.type,
-    powerMonth: `${d.powerMonth}`,
+    powerMonth: `${d[xField]}`,
     powerNum: d.powerNum,
   }));
 
@@ -30,6 +31,16 @@ const KWHArea: React.FC<KWHAreaProps> = (props) => {
           // },
         },
       }}
+      // label={{
+      //   formatter: (d) => {
+      //     console.log(d)
+      //     return d.powerNum;
+      //   },
+      //   // offsetY: -5,
+      //   style: {
+      //     fill: '#fff',
+      //   }
+      // }}
     />
   );
 };

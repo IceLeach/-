@@ -15,24 +15,41 @@ const FlylineMap: React.FC<FlylineMapProps> = (props) => {
     if (showNamePoint !== null) {
       const point = data.find((d) => d.id === showNamePoint);
       if (point) {
+        console.log('point', point);
         const box = document.createElement('div');
         box.id = 'pointTextInnerBox';
         document.getElementById('pointTextBox')?.appendChild(box);
         const pointText = (
-          <div
-            id="pointText"
-            style={{
-              color: '#fff',
-              fontSize: 12,
-              userSelect: 'none',
-              position: 'absolute',
-              whiteSpace: 'nowrap',
-              left: point.locateX - 15,
-              top: point.locateY + 10,
-            }}
-          >
-            {point.name}
-          </div>
+          <>
+            <div
+              style={{
+                width: 20,
+                height: 20,
+                position: 'absolute',
+                left: point.locateX + 8,
+                top: point.locateY - 10,
+                cursor: point.linked === 1 ? 'pointer' : 'not-allowed',
+              }}
+            ></div>
+            <div
+              id="pointText"
+              style={{
+                color: '#fff',
+                fontSize: 12,
+                userSelect: 'none',
+                position: 'absolute',
+                whiteSpace: 'nowrap',
+                zIndex: 1,
+                left: point.locateX - 15,
+                top: point.locateY + 12,
+                background: '#0E2B68',
+                padding: '2px 6px',
+                borderRadius: 4,
+              }}
+            >
+              {point.name}
+            </div>
+          </>
         );
         ReactDOM.render(pointText, box);
       }

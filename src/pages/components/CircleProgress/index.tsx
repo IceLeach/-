@@ -7,14 +7,15 @@ interface CircleProgressProps {
   percentColor: string;
   text: string;
   strokeColor: any;
+  animationType: 'A' | 'B' | 'C';
 }
 
 const CircleProgress: React.FC<CircleProgressProps> = (props) => {
-  const { percent, percentColor, text, strokeColor } = props;
+  const { percent, percentColor, text, strokeColor, animationType } = props;
 
   return (
     <Progress
-      className={styles.progress}
+      className={`${styles.progress} ${styles[`progress-${animationType}`]}`}
       type="circle"
       trailColor="#3A4A6D"
       percent={percent}

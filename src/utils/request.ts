@@ -1,8 +1,8 @@
 // export const apiUrl = 'http://localhost/screen/';
 // export const fileUrl = 'http://localhost/screenFiles/';
 // export const apiUrl = 'http://192.168.1.125';
-export const apiUrl = 'https://wx.chinalx.com/screen/';
-export const fileUrl = 'https://wx.chinalx.com/screenFiles/';
+export const apiUrl = 'http://wx.chinalx.com/screen/';
+export const fileUrl = 'http://wx.chinalx.com/screenFiles/';
 
 /**
  * request 网络请求工具

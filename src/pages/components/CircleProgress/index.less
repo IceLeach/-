@@ -1,14 +1,16 @@
 .progress {
-  padding: 0 18px;
+  // padding: 0 18px;
+  margin: 0 18px;
+  border-radius: 50%;
   .progressText {
     .percent {
-      font-size: 24px;
+      font-size: 20px;
       // font-family: PingFangSC-Regular, PingFang SC;
       font-weight: 400;
-      line-height: 32px;
+      line-height: 26px;
     }
     .itemName {
-      font-size: 14px;
+      font-size: 12px;
       line-height: 20px;
       color: #ffffff;
       font-weight: 400;
@@ -19,5 +21,50 @@
       height: 85px !important;
       width: 85px !important;
     }
+  }
+}
+
+.progress-A {
+  animation: loadA 1.5s infinite alternate;
+}
+.progress-B {
+  animation: loadB 1.5s infinite alternate;
+}
+.progress-C {
+  animation: loadC 1.5s infinite alternate;
+}
+
+@keyframes loadA {
+  0% {
+    // box-shadow: inset 0px 0px 5px 5px rgba(255, 255, 255, 0), 0px 0px 10px 3px rgba(0, 255, 140, 0.5);
+    box-shadow: inset 0px 0px 5px 5px rgba(255, 255, 255, 0),
+      0px 0px 10px 3px rgba(2, 23, 93, 0.5);
+  }
+  100% {
+    // box-shadow: inset 0px 0px 5px 5px rgba(255, 255, 255, 0), 0px 0px 20px 3px rgba(0, 255, 140, 1);
+    box-shadow: inset 0px 0px 5px 5px rgba(255, 255, 255, 0),
+      0px 0px 20px 3px rgba(0, 163, 255, 1);
+  }
+}
+
+@keyframes loadB {
+  0% {
+    box-shadow: inset 0px 0px 5px 5px rgba(255, 255, 255, 0),
+      0px 0px 10px 3px rgba(2, 23, 93, 0.5);
+  }
+  100% {
+    box-shadow: inset 0px 0px 5px 5px rgba(255, 255, 255, 0),
+      0px 0px 20px 3px rgba(146, 114, 254, 1);
+  }
+}
+
+@keyframes loadC {
+  0% {
+    box-shadow: inset 0px 0px 5px 5px rgba(255, 255, 255, 0),
+      0px 0px 10px 3px rgba(2, 23, 93, 0.5);
+  }
+  100% {
+    box-shadow: inset 0px 0px 5px 5px rgba(255, 255, 255, 0),
+      0px 0px 20px 3px rgba(75, 147, 255, 1);
   }
 }

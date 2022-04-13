@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'umi';
-import { Select, Tabs } from 'antd';
+import { Radio, Select, Tabs } from 'antd';
 import {
   CaretDownOutlined,
   CaretUpOutlined,
@@ -19,6 +19,7 @@ import {
   DeviceGetTypeList,
   DeviceThi,
   MapGetPowerSumList,
+  MapGetRunTime,
   MapPointList,
 } from '@/services/api';
 import { apiUrl, fileUrl } from '@/utils/request';
@@ -38,7 +39,9 @@ import MapLegend from './components/MapLegend';
 import FlylineMap from './components/FlylineMap';
 import DateTime from './components/DateTime';
 // @ts-ignore
-import logo from '@/assets/logo.ico';
+import logo from '@/assets/logo.jpg';
+// @ts-ignore
+import logoIcon from '@/assets/logo.ico';
 import styles from './index.less';
 
 interface RuntimeRefType {
@@ -139,6 +142,9 @@ const IndexPage: React.FC = () => {
   const [deviceThiData, setDeviceThiData] = useState<DeviceThiDataType[]>([]);
   const [mapPowerSumList, setMapPowerSumList] = useState<any[]>([]);
   const [showNamePoint, setShowNamePoint] = useState<number | null>(null);
+  const [runTime, setRunTime] = useState<number | null>(null);
+  const [leftRadioValue, setLeftRadioValue] = useState<number>(1);
+  const [rightRadioValue, setRightRadioValue] = useState<number>(1);
   const runtimeRef = useRef<RuntimeRefType>({
     zoom: 1,
     leftTabsInterval: null,
@@ -191,6 +197,8 @@ const IndexPage: React.FC = () => {
     runtimeRef.current.zoom = zoom;
     // @ts-ignore
     document.getElementById('main')!.style.zoom = `${zoom}`;
+    // document.getElementById('main')!.style.transform = `scale(${zoom},${zoom})`;
+    // document.getElementById('main')!.style.transformOrigin = 'left top';
   }, [document.body.clientWidth]);
 
   useEffect(() => {
@@ -225,9 +233,14 @@ const IndexPage: React.FC = () => {
         setDeviceIndexNum(res.data);
       }
     });
-    AlarmEventGetSumList().then((res) => {
+    AlarmEventGetSumList({ type: rightRadioValue }).then((res) => {
       if (res?.data) {
         setAlarmEventSumList(res.data);
+      }
+    });
+    MapGetRunTime().then((res) => {
+      if (res?.data) {
+        setRunTime(res.data);
       }
     });
   }, []);
@@ -314,11 +327,13 @@ const IndexPage: React.FC = () => {
       getAction();
       clearRefInterval(runtimeRef.current.leftSelectInterval);
       runtimeRef.current.leftSelectInterval = setInterval(getAction, 10000);
-      MapGetPowerSumList({ id: leftSelectKey }).then((res) => {
-        if (res?.data) {
-          setMapPowerSumList(res.data);
-        }
-      });
+      MapGetPowerSumList({ id: leftSelectKey, type: leftRadioValue }).then(
+        (res) => {
+          if (res?.data) {
+            setMapPowerSumList(res.data);
+          }
+        },
+      );
     }
 
     return () => {
@@ -514,6 +529,14 @@ const IndexPage: React.FC = () => {
           lineWidth: 0,
           // fill: 'rgb(240, 223, 83)',
           fill: '#0BDD8B',
+          // cursor: 'pointer',
+        },
+        labelCfg: {
+          position: 'bottom',
+          offset: 5,
+          style: {
+            fill: '#fff',
+          },
         },
       },
     });
@@ -523,6 +546,7 @@ const IndexPage: React.FC = () => {
         const graphData = res.data.map((d: any) => ({
           id: `${d.deviceId}`,
           name: d.deviceName,
+          label: d.deviceName,
           x: d.locateX,
           y: d.locateY,
         }));
@@ -553,6 +577,25 @@ const IndexPage: React.FC = () => {
               // @ts-ignore
               y: e.originalEvent.clientY / runtimeRef.current.zoom,
             });
+          }
+        });
+        graph.on('mousemove', (e) => {
+          // @ts-ignore
+          const offsetX = e.originalEvent.offsetX / runtimeRef.current.zoom;
+          // @ts-ignore
+          const offsetY = e.originalEvent.offsetY / runtimeRef.current.zoom;
+          const point = graphData.find(
+            (data: any) =>
+              offsetX >= data.x - 3 &&
+              offsetX <= data.x + 3 &&
+              offsetY >= data.y - 3 &&
+              offsetY <= data.y + 3,
+          );
+          if (point) {
+            console.log('e', e);
+            document.getElementById('container')!.className = styles.pointer;
+          } else {
+            document.getElementById('container')!.className = '';
           }
         });
         graph.get(
@@ -716,7 +759,7 @@ const IndexPage: React.FC = () => {
     <>
       <Helmet>
         <title>宁波舟山港大屏</title>
-        <link rel="shortcut icon" href={logo}></link>
+        <link rel="shortcut icon" href={logoIcon}></link>
       </Helmet>
       <div className={styles.main} id="main">
         <div id="dragBoxArea" className={styles.dragBoxArea}></div>
@@ -732,6 +775,7 @@ const IndexPage: React.FC = () => {
               } - ${weatherData.temp2 ?? ''}  ${weatherData.weather ?? ''}`}</div> */}
             {/* <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=te&skin=pitaya&color=FFFFFF" frameborder="0" width="200" height="24" allowtransparency="true" /> */}
             <img src={logo} className={styles.logo} />
+            <div className={styles.runTime}>安全运行{` ${runTime} `}天</div>
           </div>
         </div>
         <div className={styles.body}>
@@ -826,6 +870,7 @@ const IndexPage: React.FC = () => {
                         // '50%': '#339AFF',
                         '100%': '#339AFF',
                       }}
+                      animationType="A"
                     />
                     <StateCard
                       successNum={
@@ -857,6 +902,7 @@ const IndexPage: React.FC = () => {
                         '0%': '#9372FF',
                         '100%': '#6C8BE8',
                       }}
+                      animationType="B"
                     />
                     <StateCard
                       successNum={
@@ -885,6 +931,7 @@ const IndexPage: React.FC = () => {
                         '0%': '#4A93FF',
                         '100%': '#6AA0FF',
                       }}
+                      animationType="C"
                     />
                     <StateCard
                       successNum={
@@ -900,14 +947,42 @@ const IndexPage: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div
-                  className={styles.contentTitle}
-                  style={{ marginBottom: 6 }}
-                >
-                  用电统计
+                <div className={styles.titleLine}>
+                  <div
+                    className={styles.contentTitle}
+                    // style={{ marginBottom: 6 }}
+                  >
+                    用电统计
+                  </div>
+                  <Radio.Group
+                    buttonStyle="solid"
+                    value={leftRadioValue}
+                    className={styles.radioButton}
+                    size="small"
+                    onChange={(e) => {
+                      console.log(e.target.value);
+                      setLeftRadioValue(e.target.value);
+                      if (leftSelectKey) {
+                        MapGetPowerSumList({
+                          id: leftSelectKey,
+                          type: e.target.value,
+                        }).then((res) => {
+                          if (res?.data) {
+                            setMapPowerSumList(res.data);
+                          }
+                        });
+                      }
+                    }}
+                  >
+                    <Radio.Button value={1}>周</Radio.Button>
+                    <Radio.Button value={2}>月</Radio.Button>
+                  </Radio.Group>
                 </div>
                 <div className={styles.mapArea}>
-                  <KWHArea data={mapPowerSumList} />
+                  <KWHArea
+                    data={mapPowerSumList}
+                    xField={leftRadioValue === 1 ? 'powerTime' : 'powerMonth'}
+                  />
                 </div>
               </div>
             </div>
@@ -1035,9 +1110,34 @@ const IndexPage: React.FC = () => {
             </div>
             <div className={styles.rightBottom}>
               <div className={styles.content}>
-                <div className={styles.contentTitle}>告警统计</div>
+                <div className={styles.titleLine}>
+                  <div className={styles.contentTitle}>告警统计</div>
+                  <Radio.Group
+                    buttonStyle="solid"
+                    value={rightRadioValue}
+                    className={styles.radioButton}
+                    size="small"
+                    onChange={(e) => {
+                      console.log(e.target.value);
+                      setRightRadioValue(e.target.value);
+                      AlarmEventGetSumList({ type: e.target.value }).then(
+                        (res) => {
+                          if (res?.data) {
+                            setAlarmEventSumList(res.data);
+                          }
+                        },
+                      );
+                    }}
+                  >
+                    <Radio.Button value={1}>周</Radio.Button>
+                    <Radio.Button value={2}>月</Radio.Button>
+                  </Radio.Group>
+                </div>
                 <div className={styles.historyArea}>
-                  <HistoryDualAxes data={alarmEventSumList} />
+                  <HistoryDualAxes
+                    data={alarmEventSumList}
+                    xField={rightRadioValue === 1 ? 'alarmTime' : 'alarmMonth'}
+                  />
                 </div>
               </div>
             </div>

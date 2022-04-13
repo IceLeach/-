@@ -1,18 +1,26 @@
 import React from 'react';
 import { DualAxes } from '@ant-design/plots';
 
-interface AxesItemType {
-  alarmMonth: number;
-  alarmNum: number;
-}
+// interface AxesItemType {
+//   alarmMonth: number;
+//   alarmNum: number;
+// }
 interface HistoryDualAxesProps {
-  data: AxesItemType[];
+  data: any[];
+  xField: string;
 }
 
 const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
-  const { data } = props;
+  const { data, xField } = props;
+  console.log('data', data);
+  let maxNum = 0;
+  data.forEach((d) => {
+    if (d.alarmNum > maxNum) {
+      maxNum = d.alarmNum;
+    }
+  });
   const axesData = data.map((d) => ({
-    alarmMonth: `${d.alarmMonth}`,
+    alarmMonth: `${d[xField]}`,
     alarmNum: d.alarmNum,
     alarmLine: d.alarmNum,
   }));
@@ -42,7 +50,7 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
           },
           // label: {
           //   formatter: (data: any) => {
-          //     console.log('t', data)
+          //     // console.log('t', data)
           //     return data.alarmNum;
           //   },
           //   // autoHide: false,
@@ -64,6 +72,14 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
             color: '#E2E8FF',
           },
           smooth: true,
+          label: {
+            formatter: (data: any) => {
+              return data.alarmNum;
+            },
+            style: {
+              fill: '#fff',
+            },
+          },
         },
       ]}
       xAxis={{
@@ -77,11 +93,11 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
       yAxis={{
         alarmNum: {
           min: 0,
-          // max: 60,
+          max: maxNum * 1.1,
         },
         alarmLine: {
           min: 0,
-          // max: 60,
+          max: maxNum * 1.1,
           label: null,
         },
       }}

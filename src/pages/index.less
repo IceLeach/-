@@ -42,10 +42,17 @@
         font-size: 18px;
       }
       .logo {
-        height: 35%;
+        // height: 35%;
+        height: 38px;
         position: absolute;
         // right: 20%;
-        left: 160px;
+        left: 125px;
+      }
+      .runTime {
+        color: #fff;
+        font-size: 18px;
+        position: absolute;
+        left: 295px;
       }
     }
   }
@@ -175,6 +182,12 @@
         .regionalMap {
           width: 900px;
           height: 700px;
+          // :global{
+          //   .dv-flyline-chart-enhanced{
+          //     -webkit-filter: saturate(0.8);
+          //     filter: saturate(0.8);
+          //   }
+          // }
         }
       }
       .innerMap {
@@ -182,11 +195,11 @@
         .roomName {
           color: #fff;
           position: absolute;
-          top: 0;
+          top: 650px;
           width: 100%;
           text-align: center;
           pointer-events: none;
-          font-size: 22px;
+          font-size: 18px;
         }
         .backIcon {
           color: #fff;
@@ -270,11 +283,15 @@
         .content {
           height: 100%;
           padding: 18px 0;
-          .contentTitle {
-            margin-bottom: 30px;
+          .titleLine {
+            display: flex;
+            margin-bottom: 20px;
           }
+          // .contentTitle {
+          //   margin-bottom: 30px;
+          // }
           .historyArea {
-            height: calc(100% - 63px);
+            height: calc(100% - 53px);
             padding: 0 24px 0 32px;
             > div {
               height: 100% !important;
@@ -339,5 +356,33 @@
         }
       }
     }
+  }
+  .radioButton {
+    margin: auto 0 auto 20px;
+    :global {
+      .ant-radio-button-wrapper {
+        box-shadow: none !important;
+        background: #0e2b68;
+        border-color: #0e2b68;
+        color: #90a0c0;
+      }
+      .ant-radio-button-wrapper:first-child {
+        border-radius: 4px 0 0 4px;
+      }
+      .ant-radio-button-wrapper:last-child {
+        border-radius: 0 4px 4px 0;
+      }
+      .ant-radio-button-wrapper.ant-radio-button-wrapper-checked {
+        background: #3aa3ff;
+        border-color: #3aa3ff;
+        color: #fff;
+      }
+    }
+  }
+}
+
+.pointer {
+  > canvas {
+    cursor: pointer !important;
   }
 }
