@@ -15,7 +15,6 @@ const FlylineMap: React.FC<FlylineMapProps> = (props) => {
     if (showNamePoint !== null) {
       const point = data.find((d) => d.id === showNamePoint);
       if (point) {
-        console.log('point', point);
         const box = document.createElement('div');
         box.id = 'pointTextInnerBox';
         document.getElementById('pointTextBox')?.appendChild(box);

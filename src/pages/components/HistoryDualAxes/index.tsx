@@ -12,7 +12,6 @@ interface HistoryDualAxesProps {
 
 const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
   const { data, xField } = props;
-  console.log('data', data);
   let maxNum = 0;
   data.forEach((d) => {
     if (d.alarmNum > maxNum) {

@@ -196,9 +196,11 @@ const IndexPage: React.FC = () => {
     const zoom = document.body.clientWidth / 1920;
     runtimeRef.current.zoom = zoom;
     // @ts-ignore
-    document.getElementById('main')!.style.zoom = `${zoom}`;
-    // document.getElementById('main')!.style.transform = `scale(${zoom},${zoom})`;
-    // document.getElementById('main')!.style.transformOrigin = 'left top';
+    // document.getElementById('main')!.style.zoom = `${zoom}`;
+    document.getElementById('main')!.style.transform = `scale(${zoom},${zoom})`;
+    document.getElementById('main')!.style.transformOrigin = 'left top';
+    // document.body.style.transform = `scale(${zoom},${zoom})`;
+    // document.body.style.transformOrigin = 'left top';
   }, [document.body.clientWidth]);
 
   useEffect(() => {
@@ -560,9 +562,11 @@ const IndexPage: React.FC = () => {
         graph.on('click', (e) => {
           // console.log(e.originalEvent)
           // @ts-ignore
-          const offsetX = e.originalEvent.offsetX / runtimeRef.current.zoom;
+          const offsetX = e.originalEvent.offsetX;
+          // const offsetX = e.originalEvent.offsetX / runtimeRef.current.zoom;
           // @ts-ignore
-          const offsetY = e.originalEvent.offsetY / runtimeRef.current.zoom;
+          const offsetY = e.originalEvent.offsetY;
+          // const offsetY = e.originalEvent.offsetY / runtimeRef.current.zoom;
           const point = graphData.find(
             (data: any) =>
               offsetX >= data.x - 3 &&
@@ -581,9 +585,11 @@ const IndexPage: React.FC = () => {
         });
         graph.on('mousemove', (e) => {
           // @ts-ignore
-          const offsetX = e.originalEvent.offsetX / runtimeRef.current.zoom;
+          const offsetX = e.originalEvent.offsetX;
+          // const offsetX = e.originalEvent.offsetX / runtimeRef.current.zoom;
           // @ts-ignore
-          const offsetY = e.originalEvent.offsetY / runtimeRef.current.zoom;
+          const offsetY = e.originalEvent.offsetY;
+          // const offsetY = e.originalEvent.offsetY / runtimeRef.current.zoom;
           const point = graphData.find(
             (data: any) =>
               offsetX >= data.x - 3 &&
@@ -775,7 +781,9 @@ const IndexPage: React.FC = () => {
               } - ${weatherData.temp2 ?? ''}  ${weatherData.weather ?? ''}`}</div> */}
             {/* <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=te&skin=pitaya&color=FFFFFF" frameborder="0" width="200" height="24" allowtransparency="true" /> */}
             <img src={logo} className={styles.logo} />
-            <div className={styles.runTime}>安全运行{` ${runTime} `}天</div>
+            <div className={styles.runTime}>
+              安全运行{` ${runTime ?? ''} `}天
+            </div>
           </div>
         </div>
         <div className={styles.body}>
@@ -960,7 +968,6 @@ const IndexPage: React.FC = () => {
                     className={styles.radioButton}
                     size="small"
                     onChange={(e) => {
-                      console.log(e.target.value);
                       setLeftRadioValue(e.target.value);
                       if (leftSelectKey) {
                         MapGetPowerSumList({
@@ -1118,7 +1125,6 @@ const IndexPage: React.FC = () => {
                     className={styles.radioButton}
                     size="small"
                     onChange={(e) => {
-                      console.log(e.target.value);
                       setRightRadioValue(e.target.value);
                       AlarmEventGetSumList({ type: e.target.value }).then(
                         (res) => {
