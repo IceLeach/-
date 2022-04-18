@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'umi';
-import { Radio, Select, Tabs } from 'antd';
+import { Radio, Select, Spin, Tabs } from 'antd';
 import {
   CaretDownOutlined,
   CaretUpOutlined,
@@ -156,6 +156,7 @@ const IndexPage: React.FC = () => {
     pointModalList: [],
     pointIntervalList: [],
   });
+  const [loading, setLoading] = useState<boolean>(true);
 
   // const ws = useRef<WebSocket | null>(null);
   // const [message, setMessage] = useState('');
@@ -201,6 +202,11 @@ const IndexPage: React.FC = () => {
     document.getElementById('main')!.style.transformOrigin = 'left top';
     // document.body.style.transform = `scale(${zoom},${zoom})`;
     // document.body.style.transformOrigin = 'left top';
+    if (loading) {
+      setTimeout(() => {
+        setLoading(false);
+      }, 800);
+    }
   }, [document.body.clientWidth]);
 
   useEffect(() => {
@@ -768,6 +774,13 @@ const IndexPage: React.FC = () => {
         <link rel="shortcut icon" href={logoIcon}></link>
       </Helmet>
       <div className={styles.main} id="main">
+        <div
+          className={`${styles.loading} ${
+            loading ? styles.loadingActive : styles.loadingUnactive
+          }`}
+        >
+          <Spin spinning={loading} size="large" tip="加载中..." />
+        </div>
         <div id="dragBoxArea" className={styles.dragBoxArea}></div>
         <div className={styles.top}>
           <div className={styles.topLeft}>
