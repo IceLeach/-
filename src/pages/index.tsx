@@ -38,6 +38,7 @@ import CircleProgress from './components/CircleProgress';
 import MapLegend from './components/MapLegend';
 import FlylineMap from './components/FlylineMap';
 import DateTime from './components/DateTime';
+import AnimateBorder from './components/AnimateBorder';
 // @ts-ignore
 import logo from '@/assets/logo.jpg';
 // @ts-ignore
@@ -802,6 +803,7 @@ const IndexPage: React.FC = () => {
         <div className={styles.body}>
           <div className={styles.bodyLeft}>
             <div className={styles.leftTop}>
+              <AnimateBorder />
               <div
                 className={styles.content}
                 onMouseEnter={() =>
@@ -853,6 +855,7 @@ const IndexPage: React.FC = () => {
               </div>
             </div>
             <div className={styles.leftBottom}>
+              <AnimateBorder />
               <div className={styles.content}>
                 <div className={styles.titleLine}>
                   <div className={styles.contentTitle}>用电设备</div>
@@ -1043,6 +1046,7 @@ const IndexPage: React.FC = () => {
               className={styles.middleBottom}
               style={{ height: bottomBoxUp ? 600 : 220 }}
             >
+              <AnimateBorder />
               <div className={styles.content}>
                 <div className={styles.titleLine}>
                   <div className={styles.contentTitle}>实时告警</div>
@@ -1096,6 +1100,7 @@ const IndexPage: React.FC = () => {
           </div>
           <div className={styles.bodyRight}>
             <div className={styles.rightTop}>
+              <AnimateBorder />
               <div
                 className={styles.content}
                 onMouseEnter={() =>
@@ -1129,6 +1134,7 @@ const IndexPage: React.FC = () => {
               </div>
             </div>
             <div className={styles.rightBottom}>
+              <AnimateBorder />
               <div className={styles.content}>
                 <div className={styles.titleLine}>
                   <div className={styles.contentTitle}>告警统计</div>
