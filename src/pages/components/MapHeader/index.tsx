@@ -6,7 +6,7 @@ import styles from './index.less';
 
 export interface DeviceIndexNumType {
   deviceNum: number;
-  monitorNum: number;
+  pointNum: number;
   roomNum: number;
 }
 
@@ -35,19 +35,21 @@ const MapHeader: React.FC<MapHeaderProps> = (props) => {
         <img src={mapTop1} />
         <div className={styles.itemTitle}>节点数</div>
         <div className={styles.itemNumber}>
-          {getNumberString(data.monitorNum)}
+          {getNumberString(data.pointNum ?? 0)}
         </div>
       </div>
       <div className={styles.headerItem}>
         <img src={mapTop2} />
         <div className={styles.itemTitle}>机房数</div>
-        <div className={styles.itemNumber}>{getNumberString(data.roomNum)}</div>
+        <div className={styles.itemNumber}>
+          {getNumberString(data.roomNum ?? 0)}
+        </div>
       </div>
       <div className={styles.headerItem}>
         <img src={mapTop3} />
         <div className={styles.itemTitle}>设备数</div>
         <div className={styles.itemNumber}>
-          {getNumberString(data.deviceNum)}
+          {getNumberString(data.deviceNum ?? 0)}
         </div>
       </div>
     </div>

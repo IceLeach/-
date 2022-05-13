@@ -44,6 +44,7 @@ import logo from '@/assets/logo.jpg';
 // @ts-ignore
 import logoIcon from '@/assets/logo.ico';
 import styles from './index.less';
+import LoginPage from './components/LoginPage';
 
 interface RuntimeRefType {
   zoom: number;
@@ -129,7 +130,7 @@ const IndexPage: React.FC = () => {
   const [deviceSumList, setDeviceSumList] = useState<DeviceSumListType[]>([]);
   const [deviceIndexNum, setDeviceIndexNum] = useState<DeviceIndexNumType>({
     deviceNum: 0,
-    monitorNum: 0,
+    pointNum: 0,
     roomNum: 0,
   });
   const [alarmEventLatest, setAlarmEventLatest] = useState<any[]>([]);
@@ -158,6 +159,21 @@ const IndexPage: React.FC = () => {
     pointIntervalList: [],
   });
   const [loading, setLoading] = useState<boolean>(true);
+
+  const [isLogin, setIsLogin] = useState<boolean>(false);
+
+  useEffect(() => {
+    // const loginState = localStorage.getItem('login');
+    // console.log('document.cookie', document.cookie)
+    const login = document.cookie.substring(
+      document.cookie.indexOf('login=') + 6,
+      document.cookie.indexOf('login=') + 7,
+    );
+    // console.log('login', login)
+    if (login === '1') {
+      setIsLogin(true);
+    }
+  }, []);
 
   // const ws = useRef<WebSocket | null>(null);
   // const [message, setMessage] = useState('');
@@ -448,16 +464,22 @@ const IndexPage: React.FC = () => {
   const saveInterval = (interval: NodeJS.Timer) => {
     runtimeRef.current.pointIntervalList.push(interval);
   };
-  const createDragBox = (data: any, client: { x: number; y: number }) => {
+  const createDragBox = (
+    data: any,
+    client: { x: number; y: number },
+    active: boolean = false,
+  ) => {
     if (!document.getElementById(`box-${data.id}`)) {
-      runtimeRef.current.pointModalList.forEach((p) => {
-        closeDragBox(`box-${p}`);
-      });
-      runtimeRef.current.pointModalList = [];
-      runtimeRef.current.pointIntervalList.forEach((i) => {
-        clearRefInterval(i);
-      });
-      runtimeRef.current.pointIntervalList = [];
+      if (!active) {
+        runtimeRef.current.pointModalList.forEach((p) => {
+          closeDragBox(`box-${p}`);
+        });
+        runtimeRef.current.pointModalList = [];
+        runtimeRef.current.pointIntervalList.forEach((i) => {
+          clearRefInterval(i);
+        });
+        runtimeRef.current.pointIntervalList = [];
+      }
       const div = document.createElement('div');
       div.id = `box-${data.id}`;
       document.getElementById('dragBoxArea')?.appendChild(div);
@@ -555,7 +577,7 @@ const IndexPage: React.FC = () => {
         const graphData = res.data.map((d: any) => ({
           id: `${d.deviceId}`,
           name: d.deviceName,
-          label: d.deviceName,
+          // label: d.deviceName,
           x: d.locateX,
           y: d.locateY,
         }));
@@ -597,16 +619,27 @@ const IndexPage: React.FC = () => {
           // @ts-ignore
           const offsetY = e.originalEvent.offsetY;
           // const offsetY = e.originalEvent.offsetY / runtimeRef.current.zoom;
+          const r = 6;
           const point = graphData.find(
             (data: any) =>
-              offsetX >= data.x - 3 &&
-              offsetX <= data.x + 3 &&
-              offsetY >= data.y - 3 &&
-              offsetY <= data.y + 3,
+              offsetX >= data.x - r &&
+              offsetX <= data.x + r &&
+              offsetY >= data.y - r &&
+              offsetY <= data.y + r,
           );
           if (point) {
-            console.log('e', e);
+            // console.log('e', e);
             document.getElementById('container')!.className = styles.pointer;
+            createDragBox(
+              point,
+              {
+                // @ts-ignore
+                x: e.originalEvent.clientX / runtimeRef.current.zoom,
+                // @ts-ignore
+                y: e.originalEvent.clientY / runtimeRef.current.zoom,
+              },
+              true,
+            );
           } else {
             document.getElementById('container')!.className = '';
           }
@@ -775,399 +808,415 @@ const IndexPage: React.FC = () => {
         <link rel="shortcut icon" href={logoIcon}></link>
       </Helmet>
       <div className={styles.main} id="main">
-        <div
-          className={`${styles.loading} ${
-            loading ? styles.loadingActive : styles.loadingUnactive
-          }`}
-        >
-          <Spin spinning={loading} size="large" tip="加载中..." />
-        </div>
-        <div id="dragBoxArea" className={styles.dragBoxArea}></div>
-        <div className={styles.top}>
-          <div className={styles.topLeft}>
-            <DateTime />
-          </div>
-          <div className={styles.topMiddle}>
-            <div className={styles.title}>宁波舟山港动环监控平台</div>
-          </div>
-          <div className={styles.topRight}>
-            {/* <div className={styles.weather}>{`${weatherData.city ?? ''}  ${weatherData.temp1 ?? ''
+        {isLogin ? (
+          <>
+            <div
+              className={`${styles.loading} ${
+                loading ? styles.loadingActive : styles.loadingUnactive
+              }`}
+            >
+              <Spin spinning={loading} size="large" tip="加载中..." />
+            </div>
+            <div id="dragBoxArea" className={styles.dragBoxArea}></div>
+            <div className={styles.top}>
+              <div className={styles.topLeft}>
+                <DateTime />
+              </div>
+              <div className={styles.topMiddle}>
+                <div className={styles.title}>宁波舟山港动环监控平台</div>
+              </div>
+              <div className={styles.topRight}>
+                {/* <div className={styles.weather}>{`${weatherData.city ?? ''}  ${weatherData.temp1 ?? ''
               } - ${weatherData.temp2 ?? ''}  ${weatherData.weather ?? ''}`}</div> */}
-            {/* <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=te&skin=pitaya&color=FFFFFF" frameborder="0" width="200" height="24" allowtransparency="true" /> */}
-            <img src={logo} className={styles.logo} />
-            <div className={styles.runTime}>
-              安全运行{` ${runTime ?? ''} `}天
-            </div>
-          </div>
-        </div>
-        <div className={styles.body}>
-          <div className={styles.bodyLeft}>
-            <div className={styles.leftTop}>
-              <AnimateBorder />
-              <div
-                className={styles.content}
-                onMouseEnter={() =>
-                  clearRefInterval(runtimeRef.current.leftTabsInterval)
-                }
-                onMouseLeave={startLeftTabsInterval}
-              >
-                <div className={styles.contentTitle}>设备状态</div>
-                <div className={styles.tabs}>
-                  <Tabs
-                    type="card"
-                    className={styles.tab}
-                    activeKey={leftActiveKey}
-                    onChange={(activeKey) => setLeftActiveKey(activeKey)}
-                  >
-                    {deviceTypeList.map((type, index) => {
-                      const deviceData = deviceSumList.find(
-                        (d) => d.type === type,
-                      );
-                      return (
-                        <Tabs.TabPane tab={type} key={`${index}`}>
-                          <div className={styles.data}>
-                            <div className={styles.dataBlue}>
-                              <div className={styles.number}>
-                                {deviceData
-                                  ? deviceData.normalNum + deviceData.faultNum
-                                  : ''}
-                              </div>
-                              <div className={styles.text}>设备总数</div>
-                            </div>
-                            <div className={styles.dataGreen}>
-                              <div className={styles.number}>
-                                {deviceData ? deviceData.normalNum : ''}
-                              </div>
-                              <div className={styles.text}>设备正常</div>
-                            </div>
-                            <div className={styles.dataRed}>
-                              <div className={styles.number}>
-                                {deviceData ? deviceData.faultNum : ''}
-                              </div>
-                              <div className={styles.text}>设备异常</div>
-                            </div>
-                          </div>
-                        </Tabs.TabPane>
-                      );
-                    })}
-                  </Tabs>
+                {/* <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=te&skin=pitaya&color=FFFFFF" frameborder="0" width="200" height="24" allowtransparency="true" /> */}
+                <img src={logo} className={styles.logo} />
+                <div className={styles.runTime}>
+                  安全运行{` ${runTime ?? ''} `}天
                 </div>
               </div>
             </div>
-            <div className={styles.leftBottom}>
-              <AnimateBorder />
-              <div className={styles.content}>
-                <div className={styles.titleLine}>
-                  <div className={styles.contentTitle}>用电设备</div>
-                  <Select
-                    className={styles.select}
-                    value={leftSelectKey}
-                    onChange={(value) => setLeftSelectKey(value)}
-                    suffixIcon={
-                      <CaretDownOutlined style={{ color: '#66D7F6' }} />
-                    }
-                  >
-                    {mapData.map((data) => (
-                      <Select.Option value={data.id} key={data.id}>
-                        {data.name}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </div>
-                <div className={styles.progressArea}>
-                  <div>
-                    <CircleProgress
-                      percent={
-                        progressData.commercial &&
-                        progressData.commercial.sum !== 0
-                          ? Math.floor(
-                              (progressData.commercial.normalNum /
-                                progressData.commercial.sum) *
-                                100,
-                            )
-                          : 100
-                      }
-                      percentColor="#72ECFF"
-                      text="市电"
-                      strokeColor={{
-                        '0%': '#72ECFF',
-                        // '50%': '#339AFF',
-                        '100%': '#339AFF',
-                      }}
-                      animationType="A"
-                    />
-                    <StateCard
-                      successNum={
-                        progressData.commercial
-                          ? progressData.commercial.normalNum
-                          : 0
-                      }
-                      errorNum={
-                        progressData.commercial
-                          ? progressData.commercial.faultNum
-                          : 0
-                      }
-                    />
-                  </div>
-                  <div>
-                    <CircleProgress
-                      percent={
-                        progressData.ups && progressData.ups.sum !== 0
-                          ? Math.floor(
-                              (progressData.ups.normalNum /
-                                progressData.ups.sum) *
-                                100,
-                            )
-                          : 100
-                      }
-                      percentColor="#B7A0FF"
-                      text="UPS"
-                      strokeColor={{
-                        '0%': '#9372FF',
-                        '100%': '#6C8BE8',
-                      }}
-                      animationType="B"
-                    />
-                    <StateCard
-                      successNum={
-                        progressData.ups ? progressData.ups.normalNum : 0
-                      }
-                      errorNum={
-                        progressData.ups ? progressData.ups.faultNum : 0
-                      }
-                    />
-                  </div>
-                  <div>
-                    <CircleProgress
-                      percent={
-                        progressData.airConditioner &&
-                        progressData.airConditioner.sum !== 0
-                          ? Math.floor(
-                              (progressData.airConditioner.normalNum /
-                                progressData.airConditioner.sum) *
-                                100,
-                            )
-                          : 100
-                      }
-                      percentColor="#71A4FF"
-                      text="空调"
-                      strokeColor={{
-                        '0%': '#4A93FF',
-                        '100%': '#6AA0FF',
-                      }}
-                      animationType="C"
-                    />
-                    <StateCard
-                      successNum={
-                        progressData.airConditioner
-                          ? progressData.airConditioner.normalNum
-                          : 0
-                      }
-                      errorNum={
-                        progressData.airConditioner
-                          ? progressData.airConditioner.faultNum
-                          : 0
-                      }
-                    />
-                  </div>
-                </div>
-                <div className={styles.titleLine}>
+            <div className={styles.body}>
+              <div className={styles.bodyLeft}>
+                <div className={styles.leftTop}>
+                  <AnimateBorder />
                   <div
-                    className={styles.contentTitle}
-                    // style={{ marginBottom: 6 }}
+                    className={styles.content}
+                    onMouseEnter={() =>
+                      clearRefInterval(runtimeRef.current.leftTabsInterval)
+                    }
+                    onMouseLeave={startLeftTabsInterval}
                   >
-                    用电统计
+                    <div className={styles.contentTitle}>设备状态</div>
+                    <div className={styles.tabs}>
+                      <Tabs
+                        type="card"
+                        className={styles.tab}
+                        activeKey={leftActiveKey}
+                        onChange={(activeKey) => setLeftActiveKey(activeKey)}
+                      >
+                        {deviceTypeList.map((type, index) => {
+                          const deviceData = deviceSumList.find(
+                            (d) => d.type === type,
+                          );
+                          return (
+                            <Tabs.TabPane tab={type} key={`${index}`}>
+                              <div className={styles.data}>
+                                <div className={styles.dataBlue}>
+                                  <div className={styles.number}>
+                                    {deviceData
+                                      ? deviceData.normalNum +
+                                        deviceData.faultNum
+                                      : ''}
+                                  </div>
+                                  <div className={styles.text}>设备总数</div>
+                                </div>
+                                <div className={styles.dataGreen}>
+                                  <div className={styles.number}>
+                                    {deviceData ? deviceData.normalNum : ''}
+                                  </div>
+                                  <div className={styles.text}>设备正常</div>
+                                </div>
+                                <div className={styles.dataRed}>
+                                  <div className={styles.number}>
+                                    {deviceData ? deviceData.faultNum : ''}
+                                  </div>
+                                  <div className={styles.text}>设备异常</div>
+                                </div>
+                              </div>
+                            </Tabs.TabPane>
+                          );
+                        })}
+                      </Tabs>
+                    </div>
                   </div>
-                  <Radio.Group
-                    buttonStyle="solid"
-                    value={leftRadioValue}
-                    className={styles.radioButton}
-                    size="small"
-                    onChange={(e) => {
-                      setLeftRadioValue(e.target.value);
-                      if (leftSelectKey) {
-                        MapGetPowerSumList({
-                          id: leftSelectKey,
-                          type: e.target.value,
-                        }).then((res) => {
-                          if (res?.data) {
-                            setMapPowerSumList(res.data);
+                </div>
+                <div className={styles.leftBottom}>
+                  <AnimateBorder />
+                  <div className={styles.content}>
+                    <div className={styles.titleLine}>
+                      <div className={styles.contentTitle}>用电设备</div>
+                      <Select
+                        className={styles.select}
+                        value={leftSelectKey}
+                        onChange={(value) => setLeftSelectKey(value)}
+                        suffixIcon={
+                          <CaretDownOutlined style={{ color: '#66D7F6' }} />
+                        }
+                      >
+                        {mapData.map((data) => (
+                          <Select.Option value={data.id} key={data.id}>
+                            {data.name}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </div>
+                    <div className={styles.progressArea}>
+                      <div>
+                        <CircleProgress
+                          percent={
+                            progressData.commercial &&
+                            progressData.commercial.sum !== 0
+                              ? Math.floor(
+                                  (progressData.commercial.normalNum /
+                                    progressData.commercial.sum) *
+                                    100,
+                                )
+                              : 100
                           }
-                        });
-                      }
-                    }}
+                          percentColor="#72ECFF"
+                          text="市电"
+                          strokeColor={{
+                            '0%': '#72ECFF',
+                            // '50%': '#339AFF',
+                            '100%': '#339AFF',
+                          }}
+                          animationType="A"
+                        />
+                        <StateCard
+                          successNum={
+                            progressData.commercial
+                              ? progressData.commercial.normalNum
+                              : 0
+                          }
+                          errorNum={
+                            progressData.commercial
+                              ? progressData.commercial.faultNum
+                              : 0
+                          }
+                        />
+                      </div>
+                      <div>
+                        <CircleProgress
+                          percent={
+                            progressData.ups && progressData.ups.sum !== 0
+                              ? Math.floor(
+                                  (progressData.ups.normalNum /
+                                    progressData.ups.sum) *
+                                    100,
+                                )
+                              : 100
+                          }
+                          percentColor="#B7A0FF"
+                          text="UPS"
+                          strokeColor={{
+                            '0%': '#9372FF',
+                            '100%': '#6C8BE8',
+                          }}
+                          animationType="B"
+                        />
+                        <StateCard
+                          successNum={
+                            progressData.ups ? progressData.ups.normalNum : 0
+                          }
+                          errorNum={
+                            progressData.ups ? progressData.ups.faultNum : 0
+                          }
+                        />
+                      </div>
+                      <div>
+                        <CircleProgress
+                          percent={
+                            progressData.airConditioner &&
+                            progressData.airConditioner.sum !== 0
+                              ? Math.floor(
+                                  (progressData.airConditioner.normalNum /
+                                    progressData.airConditioner.sum) *
+                                    100,
+                                )
+                              : 100
+                          }
+                          percentColor="#71A4FF"
+                          text="空调"
+                          strokeColor={{
+                            '0%': '#4A93FF',
+                            '100%': '#6AA0FF',
+                          }}
+                          animationType="C"
+                        />
+                        <StateCard
+                          successNum={
+                            progressData.airConditioner
+                              ? progressData.airConditioner.normalNum
+                              : 0
+                          }
+                          errorNum={
+                            progressData.airConditioner
+                              ? progressData.airConditioner.faultNum
+                              : 0
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className={styles.titleLine}>
+                      <div
+                        className={styles.contentTitle}
+                        // style={{ marginBottom: 6 }}
+                      >
+                        用电统计
+                      </div>
+                      <Radio.Group
+                        buttonStyle="solid"
+                        value={leftRadioValue}
+                        className={styles.radioButton}
+                        size="small"
+                        onChange={(e) => {
+                          setLeftRadioValue(e.target.value);
+                          if (leftSelectKey) {
+                            MapGetPowerSumList({
+                              id: leftSelectKey,
+                              type: e.target.value,
+                            }).then((res) => {
+                              if (res?.data) {
+                                setMapPowerSumList(res.data);
+                              }
+                            });
+                          }
+                        }}
+                      >
+                        <Radio.Button value={1}>周</Radio.Button>
+                        <Radio.Button value={2}>月</Radio.Button>
+                      </Radio.Group>
+                    </div>
+                    <div className={styles.mapArea}>
+                      <KWHArea
+                        data={mapPowerSumList}
+                        xField={
+                          leftRadioValue === 1 ? 'powerTime' : 'powerMonth'
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.bodyMiddle}>
+                <div
+                  className={styles.outerMap}
+                  style={{ display: isInnerMap.inner ? 'none' : 'flex' }}
+                >
+                  <MapHeader data={deviceIndexNum} />
+                  <div
+                    className={styles.regionalMap}
+                    id="regionalMap"
+                    onClick={mapClick}
+                    onMouseMove={mapHover}
                   >
-                    <Radio.Button value={1}>周</Radio.Button>
-                    <Radio.Button value={2}>月</Radio.Button>
-                  </Radio.Group>
-                </div>
-                <div className={styles.mapArea}>
-                  <KWHArea
-                    data={mapPowerSumList}
-                    xField={leftRadioValue === 1 ? 'powerTime' : 'powerMonth'}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={styles.bodyMiddle}>
-            <div
-              className={styles.outerMap}
-              style={{ display: isInnerMap.inner ? 'none' : 'flex' }}
-            >
-              <MapHeader data={deviceIndexNum} />
-              <div
-                className={styles.regionalMap}
-                id="regionalMap"
-                onClick={mapClick}
-                onMouseMove={mapHover}
-              >
-                <FlylineMap
-                  data={mapData}
-                  errorPoints={deviceAlarmPointData}
-                  showNamePoint={showNamePoint}
-                />
-              </div>
-              <MapLegend />
-            </div>
-            <div
-              className={styles.innerMap}
-              id="containerr"
-              style={{ display: isInnerMap.inner ? 'block' : 'none' }}
-            >
-              <div className={styles.roomName}>{isInnerMap.data?.roomName}</div>
-              <LeftCircleOutlined
-                className={styles.backIcon}
-                onClick={removeInnerMap}
-                title="返回"
-              />
-            </div>
-            <div
-              className={styles.middleBottom}
-              style={{ height: bottomBoxUp ? 600 : 220 }}
-            >
-              <AnimateBorder />
-              <div className={styles.content}>
-                <div className={styles.titleLine}>
-                  <div className={styles.contentTitle}>实时告警</div>
-                  {bottomBoxUp ? (
-                    <CaretDownOutlined
-                      className={styles.caretIcon}
-                      onClick={() => setBottomBoxUp(false)}
+                    <FlylineMap
+                      data={mapData}
+                      errorPoints={deviceAlarmPointData}
+                      showNamePoint={showNamePoint}
                     />
-                  ) : (
-                    <CaretUpOutlined
-                      className={styles.caretIcon}
-                      onClick={() => setBottomBoxUp(true)}
-                    />
-                  )}
+                  </div>
+                  <MapLegend />
                 </div>
                 <div
-                  className={styles.scrollTable}
-                  // onWheel={(e) => {
-                  //   if (e.nativeEvent.deltaY > 0) {
-                  //     scrollRef && scrollRef.slickNext();
-                  //   } else if (e.nativeEvent.deltaY < 0) {
-                  //     scrollRef && scrollRef.slickPrev();
-                  //   }
-                  // }}
-                  // onMouseEnter={() => {
-                  //   clearRefInterval(runtimeRef.current.scrollTableInterval);
-                  //   setScrollPause(true);
-                  // }}
-                  // onMouseLeave={() => {
-                  //   runtimeRef.current.scrollTableInterval = setInterval(
-                  //     tableScroll,
-                  //     2000,
-                  //   );
-                  //   setScrollPause(false);
-                  // }}
+                  className={styles.innerMap}
+                  id="containerr"
+                  style={{ display: isInnerMap.inner ? 'block' : 'none' }}
                 >
-                  {/* <ScrollTable
+                  <div className={styles.roomName}>
+                    {isInnerMap.data?.roomName}
+                  </div>
+                  <LeftCircleOutlined
+                    className={styles.backIcon}
+                    onClick={removeInnerMap}
+                    title="返回"
+                  />
+                </div>
+                <div
+                  className={styles.middleBottom}
+                  style={{ height: bottomBoxUp ? 600 : 220 }}
+                >
+                  <AnimateBorder />
+                  <div className={styles.content}>
+                    <div className={styles.titleLine}>
+                      <div className={styles.contentTitle}>实时告警</div>
+                      {bottomBoxUp ? (
+                        <CaretDownOutlined
+                          className={styles.caretIcon}
+                          onClick={() => setBottomBoxUp(false)}
+                        />
+                      ) : (
+                        <CaretUpOutlined
+                          className={styles.caretIcon}
+                          onClick={() => setBottomBoxUp(true)}
+                        />
+                      )}
+                    </div>
+                    <div
+                      className={styles.scrollTable}
+                      // onWheel={(e) => {
+                      //   if (e.nativeEvent.deltaY > 0) {
+                      //     scrollRef && scrollRef.slickNext();
+                      //   } else if (e.nativeEvent.deltaY < 0) {
+                      //     scrollRef && scrollRef.slickPrev();
+                      //   }
+                      // }}
+                      // onMouseEnter={() => {
+                      //   clearRefInterval(runtimeRef.current.scrollTableInterval);
+                      //   setScrollPause(true);
+                      // }}
+                      // onMouseLeave={() => {
+                      //   runtimeRef.current.scrollTableInterval = setInterval(
+                      //     tableScroll,
+                      //     2000,
+                      //   );
+                      //   setScrollPause(false);
+                      // }}
+                    >
+                      {/* <ScrollTable
                     data={bottomData}
                     slidesToShow={
                       bottomBoxUp ? getScrollLimit(12) : getScrollLimit(3)
                     }
                     scrollPause={scrollPause}
                   /> */}
-                  <AlarmTable
-                    data={alarmEventLatest}
-                    bottomBoxUp={bottomBoxUp}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={styles.bodyRight}>
-            <div className={styles.rightTop}>
-              <AnimateBorder />
-              <div
-                className={styles.content}
-                onMouseEnter={() =>
-                  clearRefInterval(runtimeRef.current.rightTabsInterval)
-                }
-                onMouseLeave={startRightTabsInterval}
-              >
-                <div className={styles.contentTitle}>温湿度</div>
-                <div className={styles.tabs}>
-                  {deviceThiData.length > 1 ? (
-                    <Tabs
-                      type="card"
-                      className={`${styles.tab} ${styles.wrapTab}`}
-                      activeKey={rightActiveKey}
-                      onChange={(activeKey) => setRightActiveKey(activeKey)}
-                    >
-                      {deviceThiData.map((data) => (
-                        <Tabs.TabPane tab={data.groupName} key={data.groupKey}>
-                          <THTable data={data.groupData} />
-                        </Tabs.TabPane>
-                      ))}
-                    </Tabs>
-                  ) : deviceThiData.length === 1 ? (
-                    <div style={{ marginBottom: 42 }}>
-                      <THTable data={deviceThiData[0].groupData} />
+                      <AlarmTable
+                        data={alarmEventLatest}
+                        bottomBoxUp={bottomBoxUp}
+                      />
                     </div>
-                  ) : (
-                    ''
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className={styles.rightBottom}>
-              <AnimateBorder />
-              <div className={styles.content}>
-                <div className={styles.titleLine}>
-                  <div className={styles.contentTitle}>告警统计</div>
-                  <Radio.Group
-                    buttonStyle="solid"
-                    value={rightRadioValue}
-                    className={styles.radioButton}
-                    size="small"
-                    onChange={(e) => {
-                      setRightRadioValue(e.target.value);
-                      AlarmEventGetSumList({ type: e.target.value }).then(
-                        (res) => {
-                          if (res?.data) {
-                            setAlarmEventSumList(res.data);
-                          }
-                        },
-                      );
-                    }}
+              <div className={styles.bodyRight}>
+                <div className={styles.rightTop}>
+                  <AnimateBorder />
+                  <div
+                    className={styles.content}
+                    onMouseEnter={() =>
+                      clearRefInterval(runtimeRef.current.rightTabsInterval)
+                    }
+                    onMouseLeave={startRightTabsInterval}
                   >
-                    <Radio.Button value={1}>周</Radio.Button>
-                    <Radio.Button value={2}>月</Radio.Button>
-                  </Radio.Group>
+                    <div className={styles.contentTitle}>温湿度</div>
+                    <div className={styles.tabs}>
+                      {deviceThiData.length > 1 ? (
+                        <Tabs
+                          type="card"
+                          className={`${styles.tab} ${styles.wrapTab}`}
+                          activeKey={rightActiveKey}
+                          onChange={(activeKey) => setRightActiveKey(activeKey)}
+                        >
+                          {deviceThiData.map((data) => (
+                            <Tabs.TabPane
+                              tab={data.groupName}
+                              key={data.groupKey}
+                            >
+                              <THTable data={data.groupData} />
+                            </Tabs.TabPane>
+                          ))}
+                        </Tabs>
+                      ) : deviceThiData.length === 1 ? (
+                        <div style={{ marginBottom: 42 }}>
+                          <THTable data={deviceThiData[0].groupData} />
+                        </div>
+                      ) : (
+                        ''
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className={styles.historyArea}>
-                  <HistoryDualAxes
-                    data={alarmEventSumList}
-                    xField={rightRadioValue === 1 ? 'alarmTime' : 'alarmMonth'}
-                  />
+                <div className={styles.rightBottom}>
+                  <AnimateBorder />
+                  <div className={styles.content}>
+                    <div className={styles.titleLine}>
+                      <div className={styles.contentTitle}>告警统计</div>
+                      <Radio.Group
+                        buttonStyle="solid"
+                        value={rightRadioValue}
+                        className={styles.radioButton}
+                        size="small"
+                        onChange={(e) => {
+                          setRightRadioValue(e.target.value);
+                          AlarmEventGetSumList({ type: e.target.value }).then(
+                            (res) => {
+                              if (res?.data) {
+                                setAlarmEventSumList(res.data);
+                              }
+                            },
+                          );
+                        }}
+                      >
+                        <Radio.Button value={1}>周</Radio.Button>
+                        <Radio.Button value={2}>月</Radio.Button>
+                      </Radio.Group>
+                    </div>
+                    <div className={styles.historyArea}>
+                      <HistoryDualAxes
+                        data={alarmEventSumList}
+                        xField={
+                          rightRadioValue === 1 ? 'alarmTime' : 'alarmMonth'
+                        }
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </>
+        ) : (
+          <LoginPage setIsLogin={setIsLogin} />
+        )}
       </div>
     </>
   );
