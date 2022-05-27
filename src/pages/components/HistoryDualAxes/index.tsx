@@ -30,6 +30,7 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
       data={[axesData, axesData]}
       xField="alarmMonth"
       yField={['alarmNum', 'alarmLine']}
+      supportCSSTransform
       // appendPadding={[8, 0, 0, 0]}
       meta={{
         alarmNum: {
@@ -87,6 +88,13 @@ const HistoryDualAxes: React.FC<HistoryDualAxesProps> = (props) => {
           autoHide: false,
           autoEllipsis: false,
         },
+        // label: {
+        //   offsetX: xField === 'alarmMonth' ? 10 : 0,
+        //   rotate: xField === 'alarmMonth' ? 45 : 0,
+        //   formatter: (text: string) => {
+        //     return `${text}`;
+        //   },
+        // },
         tickCount: data.length,
       }}
       yAxis={{

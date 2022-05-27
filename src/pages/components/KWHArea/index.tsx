@@ -21,14 +21,20 @@ const KWHArea: React.FC<KWHAreaProps> = (props) => {
       xField="powerMonth"
       yField="powerNum"
       seriesField="type"
+      supportCSSTransform
       smooth={true}
       xAxis={{
+        // label: {
+        //   offsetX: xField === 'powerMonth' ? 10 : 0,
+        //   rotate: xField === 'powerMonth' ? 45 : 0,
+        //   formatter: (text: string) => {
+        //     return `${text}`;
+        //   },
+        // },
         label: {
-          // offsetX: 10,
-          // rotate: 45,
-          // formatter: (text: string) => {
-          //   return `${text}月`;
-          // },
+          autoRotate: true,
+          autoHide: false,
+          autoEllipsis: false,
         },
       }}
       // label={{

@@ -19,7 +19,7 @@ import {
   DeviceGetTypeList,
   DeviceThi,
   MapGetPowerSumList,
-  MapGetRunTime,
+  // MapGetRunTime,
   MapPointList,
 } from '@/services/api';
 import { apiUrl, fileUrl } from '@/utils/request';
@@ -162,6 +162,23 @@ const IndexPage: React.FC = () => {
 
   const [isLogin, setIsLogin] = useState<boolean>(false);
 
+  const [activePoint, setActivePoint] = useState<{
+    before: string | null;
+    current: string | null;
+  }>({ before: null, current: null });
+
+  // useEffect(() => {
+  // console.log('activePoint', activePoint)
+  // if (activePoint.before !== activePoint.current) {
+  //   if (activePoint.current && document.getElementById(`box-${activePoint.current}`)) {
+  //     document.getElementById(`box-${activePoint.current}`)!.className === `${styles.activeBox} EE`;
+  //   }
+  //   if (activePoint.before && document.getElementById(`box-${activePoint.before}`)) {
+  //     document.getElementById(`box-${activePoint.before}`)!.className === 'PP';
+  //   }
+  // }
+  // }, [activePoint])
+
   useEffect(() => {
     // const loginState = localStorage.getItem('login');
     // console.log('document.cookie', document.cookie)
@@ -263,11 +280,11 @@ const IndexPage: React.FC = () => {
         setAlarmEventSumList(res.data);
       }
     });
-    MapGetRunTime().then((res) => {
-      if (res?.data) {
-        setRunTime(res.data);
-      }
-    });
+    // MapGetRunTime().then((res) => {
+    //   if (res?.data) {
+    //     setRunTime(res.data);
+    //   }
+    // });
   }, []);
 
   useEffect(() => {
@@ -292,7 +309,8 @@ const IndexPage: React.FC = () => {
           for (let i = 0; i < Math.ceil(res.data.length / 5); i += 1) {
             rtData.push({
               groupKey: `${i}`,
-              groupName: `第${i + 1}页`,
+              // groupName: `第${i + 1}页`,
+              groupName: `${i + 1}`,
               groupData: res.data.slice(i * 5, (i + 1) * 5),
             });
           }
@@ -588,30 +606,30 @@ const IndexPage: React.FC = () => {
         //   console.log('e', e, e.item?._cfg?.model);
         //   createDragBox(e.item?._cfg?.model, { x: e.clientX, y: e.clientY });
         // });
-        graph.on('click', (e) => {
-          // console.log(e.originalEvent)
-          // @ts-ignore
-          const offsetX = e.originalEvent.offsetX;
-          // const offsetX = e.originalEvent.offsetX / runtimeRef.current.zoom;
-          // @ts-ignore
-          const offsetY = e.originalEvent.offsetY;
-          // const offsetY = e.originalEvent.offsetY / runtimeRef.current.zoom;
-          const point = graphData.find(
-            (data: any) =>
-              offsetX >= data.x - 3 &&
-              offsetX <= data.x + 3 &&
-              offsetY >= data.y - 3 &&
-              offsetY <= data.y + 3,
-          );
-          if (point) {
-            createDragBox(point, {
-              // @ts-ignore
-              x: e.originalEvent.clientX / runtimeRef.current.zoom,
-              // @ts-ignore
-              y: e.originalEvent.clientY / runtimeRef.current.zoom,
-            });
-          }
-        });
+        // graph.on('click', (e) => {
+        //   // console.log(e.originalEvent)
+        //   // @ts-ignore
+        //   const offsetX = e.originalEvent.offsetX;
+        //   // const offsetX = e.originalEvent.offsetX / runtimeRef.current.zoom;
+        //   // @ts-ignore
+        //   const offsetY = e.originalEvent.offsetY;
+        //   // const offsetY = e.originalEvent.offsetY / runtimeRef.current.zoom;
+        //   const point = graphData.find(
+        //     (data: any) =>
+        //       offsetX >= data.x - 3 &&
+        //       offsetX <= data.x + 3 &&
+        //       offsetY >= data.y - 3 &&
+        //       offsetY <= data.y + 3,
+        //   );
+        //   if (point) {
+        //     createDragBox(point, {
+        //       // @ts-ignore
+        //       x: e.originalEvent.clientX / runtimeRef.current.zoom,
+        //       // @ts-ignore
+        //       y: e.originalEvent.clientY / runtimeRef.current.zoom,
+        //     });
+        //   }
+        // });
         graph.on('mousemove', (e) => {
           // @ts-ignore
           const offsetX = e.originalEvent.offsetX;
@@ -638,9 +656,25 @@ const IndexPage: React.FC = () => {
                 // @ts-ignore
                 y: e.originalEvent.clientY / runtimeRef.current.zoom,
               },
-              true,
+              false,
             );
+            setActivePoint((before) => {
+              if (before.current) {
+                document.getElementById(`box-${before.current}`)!.className =
+                  '';
+              }
+              document.getElementById(`box-${point.id}`)!.className =
+                styles.activeBox;
+              return { before: before.current, current: point.id };
+            });
           } else {
+            setActivePoint((before) => {
+              if (before.current) {
+                document.getElementById(`box-${before.current}`)!.className =
+                  '';
+              }
+              return { before: before.current, current: null };
+            });
             document.getElementById('container')!.className = '';
           }
         });
@@ -828,10 +862,19 @@ const IndexPage: React.FC = () => {
               <div className={styles.topRight}>
                 {/* <div className={styles.weather}>{`${weatherData.city ?? ''}  ${weatherData.temp1 ?? ''
               } - ${weatherData.temp2 ?? ''}  ${weatherData.weather ?? ''}`}</div> */}
-                {/* <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=te&skin=pitaya&color=FFFFFF" frameborder="0" width="200" height="24" allowtransparency="true" /> */}
+
                 <img src={logo} className={styles.logo} />
                 <div className={styles.runTime}>
-                  安全运行{` ${runTime ?? ''} `}天
+                  {/* @ts-ignore */}
+                  <iframe
+                    scrolling="no"
+                    src="https://tianqiapi.com/api.php?style=tv&skin=pitaya&color=FFFFFF&fontsize=18"
+                    frameBorder="0"
+                    width="255"
+                    height="25"
+                    allowtransparency="true"
+                  ></iframe>
+                  {/* 安全运行{` ${runTime ?? ''} `}天 */}
                 </div>
               </div>
             </div>
