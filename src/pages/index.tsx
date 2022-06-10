@@ -138,13 +138,14 @@ const IndexPage: React.FC = () => {
     AlarmEventSumListType[]
   >([]);
   const [progressData, setProgressData] = useState<ProgressDataType>({});
-  const [deviceAlarmPointData, setDeviceAlarmPointData] = useState<number[]>(
-    [],
-  );
+  const [deviceAlarmPointData, setDeviceAlarmPointData] = useState<{
+    line: number[];
+    point: number[];
+  }>({ line: [], point: [] });
   const [deviceThiData, setDeviceThiData] = useState<DeviceThiDataType[]>([]);
   const [mapPowerSumList, setMapPowerSumList] = useState<any[]>([]);
   const [showNamePoint, setShowNamePoint] = useState<number | null>(null);
-  const [runTime, setRunTime] = useState<number | null>(null);
+  // const [runTime, setRunTime] = useState<number | null>(null);
   const [leftRadioValue, setLeftRadioValue] = useState<number>(1);
   const [rightRadioValue, setRightRadioValue] = useState<number>(1);
   const runtimeRef = useRef<RuntimeRefType>({
@@ -1105,7 +1106,7 @@ const IndexPage: React.FC = () => {
                   >
                     <FlylineMap
                       data={mapData}
-                      errorPoints={deviceAlarmPointData}
+                      errorData={deviceAlarmPointData}
                       showNamePoint={showNamePoint}
                     />
                   </div>

@@ -17,7 +17,10 @@ export interface pointType {
 
 interface FlylineChartProps {
   data: pointType[];
-  errorPoints: number[];
+  errorData: {
+    line: number[];
+    point: number[];
+  };
 }
 
 interface MapPointType {
@@ -36,7 +39,7 @@ interface MapLineType {
 }
 
 const FlylineChart: React.FC<FlylineChartProps> = (props) => {
-  const { data, errorPoints } = props;
+  const { data, errorData } = props;
 
   let corePointId: number | null = null;
   let corePointName: string | null = null;
@@ -45,7 +48,7 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
     if (d.corePoint === 1) {
       corePointId = d.id;
       corePointName = d.name;
-      if (errorPoints.find((point) => point === d.id)) {
+      if (errorData.point.find((point) => point === d.id)) {
         corePointError = true;
       }
       return {
@@ -69,7 +72,7 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
       name: d.name,
       coordinate: [d.locateX, d.locateY],
       icon: {
-        src: errorPoints.find((point) => point === d.id)
+        src: errorData.point.find((point) => point === d.id)
           ? mapCenterErrorPoint
           : mapPoint,
         width: 22,
@@ -88,10 +91,10 @@ const FlylineChart: React.FC<FlylineChartProps> = (props) => {
         lines.push({
           source: d.name,
           target: corePointName,
-          color: errorPoints.find((point) => point === d.id)
+          color: errorData.line.find((point) => point === d.id)
             ? 'transparent'
             : '#B5D3FB',
-          orbitColor: errorPoints.find((point) => point === d.id)
+          orbitColor: errorData.line.find((point) => point === d.id)
             ? '#FC9249'
             : 'rgba(103,224,227,0.7)',
         });

@@ -4,12 +4,15 @@ import FlylineChart, { pointType } from '../FlylineChart';
 
 export interface FlylineMapProps {
   data: pointType[];
-  errorPoints: number[];
+  errorData: {
+    line: number[];
+    point: number[];
+  };
   showNamePoint: number | null;
 }
 
 const FlylineMap: React.FC<FlylineMapProps> = (props) => {
-  const { data, errorPoints, showNamePoint } = props;
+  const { data, errorData, showNamePoint } = props;
 
   useEffect(() => {
     if (showNamePoint !== null) {
@@ -63,7 +66,7 @@ const FlylineMap: React.FC<FlylineMapProps> = (props) => {
   return (
     <>
       <div id="pointTextBox"></div>
-      <FlylineChart data={data} errorPoints={errorPoints} />
+      <FlylineChart data={data} errorData={errorData} />
     </>
   );
 };
