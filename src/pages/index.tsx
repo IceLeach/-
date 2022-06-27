@@ -19,6 +19,7 @@ import {
   DeviceGetTypeList,
   DeviceThi,
   MapGetPowerSumList,
+  MapGetPowerType,
   // MapGetRunTime,
   MapPointList,
 } from '@/services/api';
@@ -81,9 +82,9 @@ interface ProgressDataItemType {
 }
 
 interface ProgressDataType {
-  commercial?: ProgressDataItemType;
-  ups?: ProgressDataItemType;
-  airConditioner?: ProgressDataItemType;
+  type1?: ProgressDataItemType;
+  type2?: ProgressDataItemType;
+  type3?: ProgressDataItemType;
 }
 
 interface DeviceThiDataType {
@@ -148,6 +149,10 @@ const IndexPage: React.FC = () => {
   // const [runTime, setRunTime] = useState<number | null>(null);
   const [leftRadioValue, setLeftRadioValue] = useState<number>(1);
   const [rightRadioValue, setRightRadioValue] = useState<number>(1);
+  const [powerTypeList, setPowerTypeList] = useState<
+    { code: string; name: string }[]
+  >([]);
+  const [mapPowerSumOriginList, setMapPowerSumOriginList] = useState<any[]>([]);
   const runtimeRef = useRef<RuntimeRefType>({
     zoom: 1,
     leftTabsInterval: null,
@@ -245,6 +250,18 @@ const IndexPage: React.FC = () => {
   }, [document.body.clientWidth]);
 
   useEffect(() => {
+    if (mapPowerSumOriginList.length && powerTypeList.length) {
+      const sumList = mapPowerSumOriginList.map((item) => ({
+        ...item,
+        type:
+          powerTypeList.find((type) => type.code === item.type)?.name ??
+          item.type,
+      }));
+      setMapPowerSumList(sumList);
+    }
+  }, [mapPowerSumOriginList, powerTypeList]);
+
+  useEffect(() => {
     MapPointList().then((res) => {
       if (res?.data) {
         setMapData(res.data);
@@ -279,6 +296,11 @@ const IndexPage: React.FC = () => {
     AlarmEventGetSumList({ type: rightRadioValue }).then((res) => {
       if (res?.data) {
         setAlarmEventSumList(res.data);
+      }
+    });
+    MapGetPowerType().then((res) => {
+      if (res?.data) {
+        setPowerTypeList(res.data);
       }
     });
     // MapGetRunTime().then((res) => {
@@ -338,32 +360,78 @@ const IndexPage: React.FC = () => {
       const getAction = () => {
         DeviceGetPowerOfDevice({ id: leftSelectKey }).then((res) => {
           if (res?.data) {
-            const commercial = res.data.find((d: any) => d.type === '市电');
-            const ups = res.data.find((d: any) => d.type === 'UPS电');
-            const airConditioner = res.data.find((d: any) => d.type === '空调');
-            const data = {
-              commercial: commercial
-                ? {
-                    normalNum: commercial.normalNum,
-                    faultNum: commercial.faultNum,
-                    sum: commercial.normalNum + commercial.faultNum,
-                  }
-                : undefined,
-              ups: ups
-                ? {
-                    normalNum: ups.normalNum,
-                    faultNum: ups.faultNum,
-                    sum: ups.normalNum + ups.faultNum,
-                  }
-                : undefined,
-              airConditioner: airConditioner
-                ? {
-                    normalNum: airConditioner.normalNum,
-                    faultNum: airConditioner.faultNum,
-                    sum: airConditioner.normalNum + airConditioner.faultNum,
-                  }
-                : undefined,
+            const deviceData = res.data.map((d: any) => {
+              return {
+                ...d,
+                type: d.type.split(','),
+              };
+            });
+            const type1 = {
+              normalNum: 0,
+              faultNum: 0,
             };
+            const type2 = {
+              normalNum: 0,
+              faultNum: 0,
+            };
+            const type3 = {
+              normalNum: 0,
+              faultNum: 0,
+            };
+            deviceData.forEach((device: any) => {
+              if (device.type.includes('1')) {
+                type1.normalNum = type1.normalNum + device.normalNum ?? 0;
+                type1.faultNum = type1.faultNum + device.faultNum ?? 0;
+              }
+              if (device.type.includes('2')) {
+                type2.normalNum = type2.normalNum + device.normalNum ?? 0;
+                type2.faultNum = type2.faultNum + device.faultNum ?? 0;
+              }
+              if (device.type.includes('3')) {
+                type3.normalNum = type3.normalNum + device.normalNum ?? 0;
+                type3.faultNum = type3.faultNum + device.faultNum ?? 0;
+              }
+            });
+            const data = {
+              type1: {
+                ...type1,
+                sum: type1.normalNum + type1.faultNum,
+              },
+              type2: {
+                ...type2,
+                sum: type2.normalNum + type2.faultNum,
+              },
+              type3: {
+                ...type1,
+                sum: type3.normalNum + type3.faultNum,
+              },
+            };
+            // const commercial = res.data.find((d: any) => d.type === '市电');
+            // const ups = res.data.find((d: any) => d.type === 'UPS电');
+            // const airConditioner = res.data.find((d: any) => d.type === '空调');
+            // const data = {
+            //   commercial: commercial
+            //     ? {
+            //       normalNum: commercial.normalNum,
+            //       faultNum: commercial.faultNum,
+            //       sum: commercial.normalNum + commercial.faultNum,
+            //     }
+            //     : undefined,
+            //   ups: ups
+            //     ? {
+            //       normalNum: ups.normalNum,
+            //       faultNum: ups.faultNum,
+            //       sum: ups.normalNum + ups.faultNum,
+            //     }
+            //     : undefined,
+            //   airConditioner: airConditioner
+            //     ? {
+            //       normalNum: airConditioner.normalNum,
+            //       faultNum: airConditioner.faultNum,
+            //       sum: airConditioner.normalNum + airConditioner.faultNum,
+            //     }
+            //     : undefined,
+            // };
             setProgressData(data);
           }
         });
@@ -374,7 +442,7 @@ const IndexPage: React.FC = () => {
       MapGetPowerSumList({ id: leftSelectKey, type: leftRadioValue }).then(
         (res) => {
           if (res?.data) {
-            setMapPowerSumList(res.data);
+            setMapPowerSumOriginList(res.data);
           }
         },
       );
@@ -670,7 +738,10 @@ const IndexPage: React.FC = () => {
             });
           } else {
             setActivePoint((before) => {
-              if (before.current) {
+              if (
+                before.current &&
+                document.getElementById(`box-${before.current}`)
+              ) {
                 document.getElementById(`box-${before.current}`)!.className =
                   '';
               }
@@ -958,17 +1029,19 @@ const IndexPage: React.FC = () => {
                       <div>
                         <CircleProgress
                           percent={
-                            progressData.commercial &&
-                            progressData.commercial.sum !== 0
+                            progressData.type1 && progressData.type1.sum !== 0
                               ? Math.floor(
-                                  (progressData.commercial.normalNum /
-                                    progressData.commercial.sum) *
+                                  (progressData.type1.normalNum /
+                                    progressData.type1.sum) *
                                     100,
                                 )
                               : 100
                           }
                           percentColor="#72ECFF"
-                          text="市电"
+                          text={
+                            powerTypeList.find((type) => type.code === '1')
+                              ?.name ?? ''
+                          }
                           strokeColor={{
                             '0%': '#72ECFF',
                             // '50%': '#339AFF',
@@ -978,30 +1051,31 @@ const IndexPage: React.FC = () => {
                         />
                         <StateCard
                           successNum={
-                            progressData.commercial
-                              ? progressData.commercial.normalNum
+                            progressData.type1
+                              ? progressData.type1.normalNum
                               : 0
                           }
                           errorNum={
-                            progressData.commercial
-                              ? progressData.commercial.faultNum
-                              : 0
+                            progressData.type1 ? progressData.type1.faultNum : 0
                           }
                         />
                       </div>
                       <div>
                         <CircleProgress
                           percent={
-                            progressData.ups && progressData.ups.sum !== 0
+                            progressData.type2 && progressData.type2.sum !== 0
                               ? Math.floor(
-                                  (progressData.ups.normalNum /
-                                    progressData.ups.sum) *
+                                  (progressData.type2.normalNum /
+                                    progressData.type2.sum) *
                                     100,
                                 )
                               : 100
                           }
                           percentColor="#B7A0FF"
-                          text="UPS"
+                          text={
+                            powerTypeList.find((type) => type.code === '2')
+                              ?.name ?? ''
+                          }
                           strokeColor={{
                             '0%': '#9372FF',
                             '100%': '#6C8BE8',
@@ -1010,27 +1084,31 @@ const IndexPage: React.FC = () => {
                         />
                         <StateCard
                           successNum={
-                            progressData.ups ? progressData.ups.normalNum : 0
+                            progressData.type2
+                              ? progressData.type2.normalNum
+                              : 0
                           }
                           errorNum={
-                            progressData.ups ? progressData.ups.faultNum : 0
+                            progressData.type2 ? progressData.type2.faultNum : 0
                           }
                         />
                       </div>
                       <div>
                         <CircleProgress
                           percent={
-                            progressData.airConditioner &&
-                            progressData.airConditioner.sum !== 0
+                            progressData.type3 && progressData.type3.sum !== 0
                               ? Math.floor(
-                                  (progressData.airConditioner.normalNum /
-                                    progressData.airConditioner.sum) *
+                                  (progressData.type3.normalNum /
+                                    progressData.type3.sum) *
                                     100,
                                 )
                               : 100
                           }
                           percentColor="#71A4FF"
-                          text="空调"
+                          text={
+                            powerTypeList.find((type) => type.code === '3')
+                              ?.name ?? ''
+                          }
                           strokeColor={{
                             '0%': '#4A93FF',
                             '100%': '#6AA0FF',
@@ -1039,14 +1117,12 @@ const IndexPage: React.FC = () => {
                         />
                         <StateCard
                           successNum={
-                            progressData.airConditioner
-                              ? progressData.airConditioner.normalNum
+                            progressData.type3
+                              ? progressData.type3.normalNum
                               : 0
                           }
                           errorNum={
-                            progressData.airConditioner
-                              ? progressData.airConditioner.faultNum
-                              : 0
+                            progressData.type3 ? progressData.type3.faultNum : 0
                           }
                         />
                       </div>
@@ -1071,7 +1147,7 @@ const IndexPage: React.FC = () => {
                               type: e.target.value,
                             }).then((res) => {
                               if (res?.data) {
-                                setMapPowerSumList(res.data);
+                                setMapPowerSumOriginList(res.data);
                               }
                             });
                           }

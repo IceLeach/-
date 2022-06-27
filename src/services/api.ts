@@ -84,3 +84,9 @@ export async function MapGetRunTime() {
     method: 'get',
   });
 }
+
+export async function MapGetPowerType() {
+  return request('api/map/getPowerType', {
+    method: 'get',
+  });
+}
