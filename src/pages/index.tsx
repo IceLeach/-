@@ -402,7 +402,7 @@ const IndexPage: React.FC = () => {
                 sum: type2.normalNum + type2.faultNum,
               },
               type3: {
-                ...type1,
+                ...type3,
                 sum: type3.normalNum + type3.faultNum,
               },
             };
@@ -1169,25 +1169,27 @@ const IndexPage: React.FC = () => {
                 </div>
               </div>
               <div className={styles.bodyMiddle}>
-                <div
-                  className={styles.outerMap}
-                  style={{ display: isInnerMap.inner ? 'none' : 'flex' }}
-                >
-                  <MapHeader data={deviceIndexNum} />
+                {!isInnerMap.inner && (
                   <div
-                    className={styles.regionalMap}
-                    id="regionalMap"
-                    onClick={mapClick}
-                    onMouseMove={mapHover}
+                    className={styles.outerMap}
+                    // style={{ display: isInnerMap.inner ? 'none' : 'flex' }}
                   >
-                    <FlylineMap
-                      data={mapData}
-                      errorData={deviceAlarmPointData}
-                      showNamePoint={showNamePoint}
-                    />
+                    <MapHeader data={deviceIndexNum} />
+                    <div
+                      className={styles.regionalMap}
+                      id="regionalMap"
+                      onClick={mapClick}
+                      onMouseMove={mapHover}
+                    >
+                      <FlylineMap
+                        data={mapData}
+                        errorData={deviceAlarmPointData}
+                        showNamePoint={showNamePoint}
+                      />
+                    </div>
+                    <MapLegend />
                   </div>
-                  <MapLegend />
-                </div>
+                )}
                 <div
                   className={styles.innerMap}
                   id="containerr"
