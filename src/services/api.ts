@@ -90,3 +90,10 @@ export async function MapGetPowerType() {
     method: 'get',
   });
 }
+
+export async function Login(data: { loginName: string; password: string }) {
+  return request(`api/login`, {
+    method: 'post',
+    data,
+  });
+}

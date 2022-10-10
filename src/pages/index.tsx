@@ -42,6 +42,7 @@ import DateTime from './components/DateTime';
 import AnimateBorder from './components/AnimateBorder';
 // @ts-ignore
 import logo from '@/assets/logo.jpg';
+import changePassword from '@/assets/changePassword.png';
 // @ts-ignore
 import logoIcon from '@/assets/logo.ico';
 import styles from './index.less';
@@ -948,6 +949,11 @@ const IndexPage: React.FC = () => {
                   ></iframe>
                   {/* 安全运行{` ${runTime ?? ''} `}天 */}
                 </div>
+                <img
+                  src={changePassword}
+                  title="修改密码"
+                  className={styles.changePassword}
+                />
               </div>
             </div>
             <div className={styles.body}>
