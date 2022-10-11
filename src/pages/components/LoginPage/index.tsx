@@ -17,8 +17,9 @@ const LoginPage: React.FC<LoginPageProps> = (props) => {
       <LoginForm
         title="宁波舟山港大屏"
         subTitle={<></>}
-        onFinish={(value) => {
-          const isOK = login(value.account, value.password);
+        onFinish={async (value) => {
+          const isOK = await login(value.account, value.password);
+          // const isOK = login(value.account, value.password);
           if (isOK) {
             setIsLogin(true);
           } else {

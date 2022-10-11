@@ -47,6 +47,7 @@ import changePassword from '@/assets/changePassword.png';
 import logoIcon from '@/assets/logo.ico';
 import styles from './index.less';
 import LoginPage from './components/LoginPage';
+import ChangePasswordModal from './components/ChangePasswordModal';
 
 interface RuntimeRefType {
   zoom: number;
@@ -173,6 +174,9 @@ const IndexPage: React.FC = () => {
     before: string | null;
     current: string | null;
   }>({ before: null, current: null });
+
+  const [passwordModalVisible, setPasswordModalVisible] =
+    useState<boolean>(false);
 
   // useEffect(() => {
   // console.log('activePoint', activePoint)
@@ -952,6 +956,7 @@ const IndexPage: React.FC = () => {
                 <img
                   src={changePassword}
                   title="修改密码"
+                  onClick={() => setPasswordModalVisible(true)}
                   className={styles.changePassword}
                 />
               </div>
@@ -1346,6 +1351,10 @@ const IndexPage: React.FC = () => {
           <LoginPage setIsLogin={setIsLogin} />
         )}
       </div>
+      <ChangePasswordModal
+        visible={passwordModalVisible}
+        onClose={() => setPasswordModalVisible(false)}
+      />
     </>
   );
 };

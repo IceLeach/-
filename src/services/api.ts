@@ -97,3 +97,14 @@ export async function Login(data: { loginName: string; password: string }) {
     data,
   });
 }
+
+export async function UpdatePassword(data: {
+  userId?: number;
+  oldPassword: string;
+  newPassword: string;
+}) {
+  return request(`api/updatePassword`, {
+    method: 'post',
+    data,
+  });
+}
