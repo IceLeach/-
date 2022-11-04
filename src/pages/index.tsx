@@ -168,7 +168,7 @@ const IndexPage: React.FC = () => {
   });
   const [loading, setLoading] = useState<boolean>(true);
 
-  const [isLogin, setIsLogin] = useState<boolean>(false);
+  const [isLogin, setIsLogin] = useState<boolean>(true);
 
   const [activePoint, setActivePoint] = useState<{
     before: string | null;

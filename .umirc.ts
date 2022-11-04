@@ -5,9 +5,9 @@ export default defineConfig({
   nodeModulesTransform: {
     type: 'none',
   },
-  // publicPath: '/nbgscreen/',
-  // routes: [{ path: '/nbgscreen/', component: '@/pages/index' }],
-  routes: [{ path: '/', component: '@/pages/index' }],
+  publicPath: '/nbgscreen/',
+  routes: [{ path: '/nbgscreen/', component: '@/pages/index' }],
+  // routes: [{ path: '/', component: '@/pages/index' }],
   fastRefresh: {},
   // proxy: {
   //   '/weather': {

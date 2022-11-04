@@ -1,10 +1,10 @@
 // export const apiUrl = 'http://localhost/screen/';
 // export const fileUrl = 'http://localhost/screenFiles/';
 // export const apiUrl = 'http://192.168.1.125';
-export const apiUrl = 'http://192.168.1.101/screen/';
-export const fileUrl = 'http://192.168.1.101/screenFiles/';
-// export const apiUrl = 'http://wx.chinalx.com/screen/';
-// export const fileUrl = 'http://wx.chinalx.com/screenFiles/';
+// export const apiUrl = 'http://localhost/screen/';
+// export const fileUrl = 'http://localhost/screenFiles/';
+export const apiUrl = 'http://wx.chinalx.com/screen/';
+export const fileUrl = 'http://wx.chinalx.com/screenFiles/';
 // export const apiUrl = 'http://10.168.5.101/screen/';
 // export const fileUrl = 'http://10.168.5.101/screenFiles/';
 
