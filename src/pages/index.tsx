@@ -22,6 +22,7 @@ import {
   MapGetPowerType,
   // MapGetRunTime,
   MapPointList,
+  MapPointListOfPower,
 } from '@/services/api';
 import { apiUrl, fileUrl } from '@/utils/request';
 import { cloneDeep } from 'lodash';
@@ -126,6 +127,7 @@ const IndexPage: React.FC = () => {
   const [innerGraph, setInnerGraph] = useState<Graph | null>(null);
   // const [weatherData, setWeatherData] = useState<any>({});
   const [mapData, setMapData] = useState<any[]>([]);
+  const [selectMapData, setSelectMapData] = useState<any[]>([]);
   const [mapPercentData, setMapPercentData] = useState<MapPercentDataType[]>(
     [],
   );
@@ -284,6 +286,13 @@ const IndexPage: React.FC = () => {
               : [d.locateY / 700 - 0.007, d.locateY / 700 + 0.007],
         }));
         setMapPercentData(points);
+        // const selectedPoint = res.data.find((d: any) => d.selected === 1);
+        // setLeftSelectKey(selectedPoint ? selectedPoint.id : res.data[0].id);
+      }
+    });
+    MapPointListOfPower().then((res) => {
+      if (res?.data) {
+        setSelectMapData(res.data);
         const selectedPoint = res.data.find((d: any) => d.selected === 1);
         setLeftSelectKey(selectedPoint ? selectedPoint.id : res.data[0].id);
       }
@@ -437,6 +446,7 @@ const IndexPage: React.FC = () => {
             //     }
             //     : undefined,
             // };
+            // console.log('d', data, deviceData)
             setProgressData(data);
           }
         });
@@ -1029,7 +1039,7 @@ const IndexPage: React.FC = () => {
                           <CaretDownOutlined style={{ color: '#66D7F6' }} />
                         }
                       >
-                        {mapData.map((data) => (
+                        {selectMapData.map((data) => (
                           <Select.Option value={data.id} key={data.id}>
                             {data.name}
                           </Select.Option>

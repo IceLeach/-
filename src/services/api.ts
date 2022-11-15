@@ -6,6 +6,12 @@ export async function MapPointList() {
   });
 }
 
+export async function MapPointListOfPower() {
+  return request('api/map/pointListOfPower', {
+    method: 'get',
+  });
+}
+
 export async function DeviceGetTypeList() {
   return request('api/device/getTypeList', {
     method: 'get',
